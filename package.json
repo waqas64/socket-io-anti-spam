@@ -1,6 +1,6 @@
 {
   "name": "socket-anti-spam",
-  "version": "0.0.3",
+  "version": "0.0.5",
   "description": "Tired of users spamming your socket.io emits? this module prevents this",
   "main": "antispam.js",
   "scripts": {
