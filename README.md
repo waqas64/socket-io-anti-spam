@@ -4,7 +4,7 @@
 
 
 # How does it look?
-	var antiSpam = require('./antispam', io);
+	var antiSpam = require('./antispam');
 	var antiSpam = new antiSpam({
 		spamCheckInterval: 3000,
 		spamMinusPointsPerInterval: 3,
@@ -28,6 +28,12 @@
 
 ## 2. Put this in your nodejs server file AFTER you have defined socket.io variable:
 	var antiSpam = require('socket-anti-spam', io);
+	var antiSpam = new antiSpam({
+		spamCheckInterval: 3000, // define in how much miliseconds the antispam script gives a minus spamscore point
+		spamMinusPointsPerInterval: 3, // how many minus spamscore points after x miliseconds?
+		spamMaxPointsBeforeKick: 9, // needed points before kick
+		debug: false // debug? not needed
+	});
 	
 Now all sockets will be individually checked if they spam your socket.emits and if they do they will be disconnected.
 
