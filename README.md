@@ -27,7 +27,7 @@
     npm install socket-anti-spam
 
 ## 2. Put this in your nodejs server file AFTER you have defined socket.io variable:
-	var antiSpam = require('socket-anti-spam', io);
+	var antiSpam = require('socket-anti-spam');
 	var antiSpam = new antiSpam({
 		spamCheckInterval: 3000, // define in how much miliseconds the antispam script gives a minus spamscore point
 		spamMinusPointsPerInterval: 3, // how many minus spamscore points after x miliseconds?
