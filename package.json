@@ -1,0 +1,25 @@
+{
+  "name": "socket-anti-spam",
+  "version": "0.0.0",
+  "description": "Tired of users spamming your socket.io emits? this module prevents this",
+  "main": "antispam.js",
+  "scripts": {
+    "test": "node test.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://bitbucket.org/michaeldegroot/socket-anti-spam"
+  },
+  "keywords": [
+    "socket.io",
+    "antispam",
+    "anti",
+    "spam",
+    "socket"
+  ],
+  "author": "michaeldegroot",
+  "license": "ISC",
+  "dependencies": {
+    "socket.io": "^0.9.16"
+  }
+}
