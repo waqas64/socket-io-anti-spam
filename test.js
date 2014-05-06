@@ -1,7 +1,7 @@
 // This is the test file for socket-anti-spam. Goto 127.0.0.1:8080 and run this to see it live!
 
 // Everyone has this line already when using socket-anti-spam
-io = require('socket.io').listen(8080,{ log: false });
+var io = require('socket.io').listen(8080,{ log: false });
 
 // This is just for the index.html
 var static = require('node-static');

@@ -44,7 +44,6 @@
 		if(spamData[socket.id].spamScore>=maxSpam && !socket.spamViolated){
 		  socket.spamViolated = true;
 		  socket.disconnect();
-
 	   }
 	}
 	
