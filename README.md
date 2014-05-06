@@ -7,11 +7,6 @@
 	// Everyone has this line already when using socket-anti-spam
 	var io = require('socket.io').listen(8080,{ log: false });
 
-	// This is just for the index.html
-	var static = require('node-static');
-	var http = require('http');
-	var file = new static.Server('./public');
-
 	// Needed for socket-anti-spam to work correctly
 	var antiSpam = require('./antispam');
 	var antiSpam = new antiSpam({
@@ -20,11 +15,6 @@
 		spamMaxPointsBeforeKick: 9,
 		debug: true
 	});
-
-	// Lets create server for index.html
-	http.createServer(function (req, res) {
-	  file.serve(req, res);
-	}).listen(80);
 
 	 // Everyone has this line already when using socket-anti-spam
 	io.sockets.on('connection', function (socket) {
