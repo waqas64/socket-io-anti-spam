@@ -17,7 +17,11 @@
 		spamCheckInterval: 3000,
 		spamMinusPointsPerInterval: 3,
 		spamMaxPointsBeforeKick: 9,
-		debug: true
+		spamEnableTempBan: true,
+		spamKicksBeforeTempBan: 3,
+		spamTempBanInMinutes: 10,
+		removeKickCountAfter: 1,
+		debug: false
 	});
 
 	 // Everyone has this line already when using socket-anti-spam
@@ -39,6 +43,10 @@
 		spamCheckInterval: 3000, // define in how much miliseconds the antispam script gives a minus spamscore point
 		spamMinusPointsPerInterval: 3, // how many minus spamscore points after x miliseconds?
 		spamMaxPointsBeforeKick: 9, // needed points before kick
+		spamEnableTempBan: true, // Enable the temp ban system (temp ban users after x amount of kicks within x amount of time)
+		spamKicksBeforeTempBan: 3, // This many kicks needed for a temp ban
+		spamTempBanInMinutes: 10, // This many minutes temp ban will be active
+		removeKickCountAfter: 1, // This many minutes until the kick counter is decreasing with 1 for the user
 		debug: false // debug? not needed
 	});
 	
