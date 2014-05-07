@@ -1,4 +1,4 @@
-// This is the test file for socket-anti-spam. Goto 127.0.0.1:8080 and run this to see it live!
+// This is the test file for socket-anti-spam. Goto 127.0.0.1 and run this to see it live!
 
 // Everyone has this line already when using socket-anti-spam
 var io = require('socket.io').listen(8080,{ log: false });
@@ -13,7 +13,11 @@ var antiSpam = require('./antispam');
 var antiSpam = new antiSpam({
 	spamCheckInterval: 3000,
 	spamMinusPointsPerInterval: 3,
-	spamMaxPointsBeforeKick: 9,
+	spamMaxPointsBeforeKick: 12,
+	spamEnableTempBan: true,
+	spamKicksBeforeTempBan: 3,
+	spamTempBanInMinutes: 10,
+	removeKickCountAfter: 1,
 	debug: true
 });
 

@@ -21,6 +21,12 @@
 	socket.on("spamscore", function(score){
 		spamscorediv.innerHTML = 'Spamscore: '+score+'<br/>';
 	});
+	setInterval(function(){
+		//safe to assume user is banned if connecting takes this long
+		if(!disconnected) return;
+		doingdiv.innerHTML = 'STATUS: Banned!<br/>';
+		
+	},2000);
 	function repeat(){
 		if(disconnected) return;
 		socket.emit('spamming', { some: 'data' });

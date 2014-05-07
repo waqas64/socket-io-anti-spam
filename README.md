@@ -1,7 +1,11 @@
 # What it does
 
-###### Tired of users spamming your socket.io emits? this module prevents this! ######
+##### Tired of users spamming your socket.io emits? this module prevents this. #####
 
+## Changelog
+### 5/7/14
+ - Can now temp ban after x amount of kicks within x defined of time.
+ - Client detection based on ip now instead of socket.id (This is how we keep track of amount kicks and ban accordingly)
 
 # How does it look?
 	// Everyone has this line already when using socket-anti-spam
