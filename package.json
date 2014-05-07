@@ -20,7 +20,6 @@
   "author": "michaeldegroot",
   "license": "ISC",
   "dependencies": {
-    "moment": "^2.6.0",
     "socket.io": "^0.9.16"
   }
 }
