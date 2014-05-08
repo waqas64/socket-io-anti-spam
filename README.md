@@ -3,6 +3,8 @@
 ##### Tired of users spamming your socket.io emits? this module prevents this. #####
 
 ## Changelog
+### 5/8/14
+ - Changed the readme (added a last step that I forgot to mention but it was detailed in the example 'How does it look'
 ### 5/7/14
  - Can now temp ban after x amount of kicks within x defined of time.
  - Client detection based on ip now instead of socket.id (This is how we keep track of amount kicks and ban accordingly)
@@ -37,7 +39,7 @@
 ## 1. Start by installing the package:
     npm install socket-anti-spam
 
-## 2. Put this in your nodejs server file AFTER you have defined socket.io variable:
+## 2. Put this in your server side file AFTER you have defined socket.io variable:
 	var antiSpam = require('socket-anti-spam');
 	var antiSpam = new antiSpam({
 		spamCheckInterval: 3000, // define in how much miliseconds the antispam script gives a minus spamscore point
@@ -48,6 +50,11 @@
 		spamTempBanInMinutes: 10, // This many minutes temp ban will be active
 		removeKickCountAfter: 1, // This many minutes until the kick counter is decreasing with 1 for the user
 		debug: false // debug? not needed
+	});
+	
+## 3. Put this inbetween the socket.on connection @ server side
+	io.sockets.on('connection', function (socket) {
+		antiSpam.onConnect(socket);
 	});
 	
 Now all sockets will be individually checked if they spam your socket.emits and if they do they will be disconnected.
