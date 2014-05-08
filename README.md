@@ -3,12 +3,15 @@
 ##### Tired of users spamming your socket.io emits? this module prevents this. #####
 
 ## Changelog
+
 ### 5/8/14
  - Changed the readme (added a last step that I forgot to mention but it was detailed in the example 'How does it look'
+ 
 ### 5/7/14
  - Can now temp ban after x amount of kicks within x defined of time.
  - Client detection based on ip now instead of socket.id (This is how we keep track of amount kicks and ban accordingly)
 
+ 
 # How does it look?
 	// Everyone has this line already when using socket-anti-spam
 	var io = require('socket.io').listen(8080,{ log: false });
