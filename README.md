@@ -13,6 +13,9 @@
 
  
 # How does it look?
+
+![socketspam.gif](https://bitbucket.org/repo/kR4677/images/1013607973-socketspam.gif)
+
 	// Everyone has this line already when using socket-anti-spam
 	var io = require('socket.io').listen(8080,{ log: false });
 
