@@ -1,3 +1,5 @@
+[![NPM](https://nodei.co/npm/socket-anti-spam.png?downloads=true&downloadRank=true&stars=true)](https://nodei.co/npm/socket-anti-spam/)
+
 # What it does
 
 ##### Tired of users spamming your socket.io emits? this module prevents this. #####
@@ -10,11 +12,15 @@
 ### 5/7/14
  - Can now temp ban after x amount of kicks within x defined of time.
  - Client detection based on ip now instead of socket.id (This is how we keep track of amount kicks and ban accordingly)
-
  
+### 12/5/15
+ - Removed array.prototype.contains as it is not used anywhere
+
+
 # How does it look?
 
 ![socketspam.gif](https://bitbucket.org/repo/kR4677/images/1013607973-socketspam.gif)
+
 
 	// Everyone has this line already when using socket-anti-spam
 	var io = require('socket.io').listen(8080,{ log: false });
@@ -37,7 +43,7 @@
 		antiSpam.onConnect(socket); // Needed for socket-anti-spam to work correctly
 	});
 
-## And now you are safe from people repeatedly spamming your sockets!
+## And now you are safe from people repeatedly spamming your sockets (based on ip)!
 
 
 #  How do I use it?
@@ -63,7 +69,7 @@
 		antiSpam.onConnect(socket);
 	});
 	
-Now all sockets will be individually checked if they spam your socket.emits and if they do they will be disconnected.
+Now all sockets will be individually checked if they spam your socket.emits and if they do they will be disconnected, after to many repeated offenses they will be temp banned (ip based).
 
 # Contact
     You can contact me at specamps@gmail.com

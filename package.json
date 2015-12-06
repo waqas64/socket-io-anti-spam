@@ -1,6 +1,6 @@
 {
   "name": "socket-anti-spam",
-  "version": "0.1.2",
+  "version": "0.2.0",
   "description": "Tired of users spamming your socket.io emits? this module prevents this",
   "main": "antispam.js",
   "scripts": {
@@ -8,7 +8,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git@bitbucket.org:michaeldegroot/socket-anti-spam.git"
+    "url": "https://bitbucket.org/michaeldegroot/socket-anti-spam"
   },
   "keywords": [
     "socket.io",
@@ -17,6 +17,27 @@
     "spam",
     "socket"
   ],
-  "author": "michaeldegroot",
-  "license": "ISC"
+  "author": {
+    "name": "michaeldegroot"
+  },
+  "license": "ISC",
+  "_id": "socket-anti-spam@0.1.8",
+  "_shasum": "28f273a27e5c7599cf02f4e9e807dd3c8eee15ee",
+  "_from": "socket-anti-spam@",
+  "_resolved": "https://registry.npmjs.org/socket-anti-spam/-/socket-anti-spam-0.1.3.tgz",
+  "_npmVersion": "1.4.9",
+  "_npmUser": {
+    "name": "michaeldegroot",
+    "email": "specamps@gmail.com"
+  },
+  "maintainers": [
+    {
+      "name": "michaeldegroot",
+      "email": "specamps@gmail.com"
+    }
+  ],
+  "dist": {
+    "shasum": "ce88b6375477d35d50f2797eaf9632265fb98328",
+    "tarball": "http://registry.npmjs.org/socket-anti-spam/-/socket-anti-spam-0.1.3.tgz"
+  }
 }

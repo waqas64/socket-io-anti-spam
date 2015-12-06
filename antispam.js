@@ -23,7 +23,7 @@
 	antiSpam.prototype.addSpam = function(socket){
 		if(socket.spamViolated) return;
 		spamData[socket.ip].spamScore+=1;
-		console.log(spamData[socket.ip]);
+		if(Debug) console.log(spamData[socket.ip]);
 		this.maxSpamCheck(socket);
 	}
 	
@@ -104,17 +104,11 @@
 			if(Debug){
 				timeout = spamData[socket.ip].timeout;
 				left = Math.ceil((timeout._idleStart + timeout._idleTimeout - Date.now()) / 1000);
-				console.log("[ "+socket.id + " / "+socket.ip+" ] is still banned for "+left+" seconds");
+				if(Debug) console.log("[ "+socket.id + " / "+socket.ip+" ] is still banned for "+left+" seconds");
 			}
 			socket.disconnect();
 		}
 		spamData[address.address].spamScore = 0;
 	}
-
-	Array.prototype.contains = function(k) {
-		for(var p in this)
-		if(this[p] === k) return true;
-		return false;
-	};
 	module.exports = antiSpam;
 }).call(this);
