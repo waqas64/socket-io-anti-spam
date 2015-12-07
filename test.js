@@ -1,14 +1,6 @@
-// This is the test file for socket-anti-spam. Goto 127.0.0.1 and run this to see it live!
-
-// Everyone has this line already when using socket-anti-spam
 var io = require('socket.io').listen(8080,{ log: false });
+var clientIo = require('socket.io-client');
 
-// This is just for the index.html
-var static = require('node-static');
-var http = require('http');
-var file = new static.Server('./public');
-
-// Actually needed for antispam
 var antiSpam = require('./antispam');
 var antiSpam = new antiSpam({
 	spamCheckInterval: 3000,
@@ -21,19 +13,33 @@ var antiSpam = new antiSpam({
 	debug: true
 });
 
-// Lets create server for index.html
-http.createServer(function (req, res) {
-  file.serve(req, res);
-}).listen(80);
-
- // Everyone has this line already when using socket-anti-spam
 io.sockets.on('connection', function (socket) {
-	 // This is actually needed to be added by the user only
 	antiSpam.onConnect(socket);
-	
-	 // Extra socket function for testing purposes so we can spam something :3
 	socket.on("spamming", function() {
-		 // give the client a spamscore back for testing purposes
 		socket.emit("spamscore", antiSpam.getSpamScore(socket));
 	});
 });
+
+var socket = clientIo.connect('http://localhost:8080');
+var less = 1;
+disconnected = false;
+
+socket.on("connect", function(){
+	repeat();
+});
+socket.on("disconnect", function(){
+	disconnected = true;
+});
+socket.on("spamscore", function(score){
+});
+setInterval(function(){
+	if(!disconnected) return;
+	console.log("TEST PASSED");
+	process.exit();
+},2000);
+function repeat(){
+	if(disconnected) return;
+	socket.emit('spamming', { some: 'data' });
+	setTimeout(function(){ repeat(); },10);
+}
+
