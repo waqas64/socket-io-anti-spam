@@ -1,4 +1,8 @@
-[![NPM](https://nodei.co/npm/socket-anti-spam.png?downloads=true&downloadRank=true&stars=true)](https://nodei.co/npm/socket-anti-spam/)
+![NPM](https://nodei.co/npm/socket-anti-spam.png?downloads=true&downloadRank=true&stars=true)
+
+[ ![Image](https://david-dm.org/michaeldegroot/socket-anti-spam.svg "deps") ](https://david-dm.org/michaeldegroot/socket-anti-spam "david-dm")
+[ ![Image](https://travis-ci.org/michaeldegroot/socket-anti-spam.svg?branch=master "testing") ](https://travis-ci.org/michaeldegroot/socket-anti-spam "travis-ci")
+![NPM](https://img.shields.io/badge/Node-%3E%3D0.10-green.svg)
 
 # What it does
 
