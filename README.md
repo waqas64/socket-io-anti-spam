@@ -2,6 +2,7 @@
 
 [ ![Image](https://david-dm.org/michaeldegroot/socket-anti-spam.svg "deps") ](https://david-dm.org/michaeldegroot/socket-anti-spam "david-dm")
 [ ![Image](https://travis-ci.org/michaeldegroot/socket-anti-spam.svg?branch=master "testing") ](https://travis-ci.org/michaeldegroot/socket-anti-spam "travis-ci")
+[![Coverage Status](https://coveralls.io/repos/michaeldegroot/socket-anti-spam/badge.svg?branch=master&service=github)](https://coveralls.io/github/michaeldegroot/socket-anti-spam?branch=master)
 ![NPM](https://img.shields.io/badge/Node-%3E%3D0.10-green.svg)
 ![](https://img.shields.io/npm/dt/socket-anti-spam.svg)
 ![](https://img.shields.io/npm/l/express.svg)
