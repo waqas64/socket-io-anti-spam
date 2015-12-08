@@ -30,7 +30,7 @@ io.sockets.on('connection', function (socket) {
 
 describe("Socket.io", function(){
 	it('Connect', function(done){
-		socket = clientIo.connect('http://localhost:3000');
+		socket = clientIo.connect('http://127.0.0.1:3000');
 		io.sockets.on('connection', function (socket) {
 			clientSocket = socket;
 			done();
@@ -42,7 +42,7 @@ describe("Internal", function(){
 	this.timeout(60000);
 	var passedInt;
 	it('Connect to the webserver, spam socket.emits and get disconnect/kicked', function(done){
-		var socket = clientIo.connect('http://localhost:3000');
+		var socket = clientIo.connect('http://127.0.0.1:3000');
 		socket.on("connect", function(){
 			repeat();
 		});
