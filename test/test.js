@@ -37,7 +37,7 @@ describe("Socket.io", function(){
 		});
 	});
 });
-
+/**
 describe("Internal", function(){
 	this.timeout(60000);
 	var passedInt;
@@ -69,4 +69,5 @@ describe("Internal", function(){
 		},10);
 	});
 });
+*/
 
