@@ -88,5 +88,10 @@ describe("Internal", function(){
 			done();
 		},100);
 	});
+	it('Remove kickcount', function(){
+		assert.doesNotThrow(function(){
+			antiSpam.removeKickCount();
+		});
+	});
 });
 

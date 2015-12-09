@@ -90,6 +90,9 @@
 		socket.spamViolated = false;
 		var address = socket.handshake.address;
 		socket.ip = address.address;
+		if(address.address==undefined) socket.ip = address;
+		console.log(address);
+		console.log("------------------------------------");
 		
 		if(typeof(spamData[socket.ip])=="undefined"){
 			spamData[socket.ip] = {
@@ -108,7 +111,7 @@
 			}
 			socket.disconnect();
 		}
-		spamData[address.address].spamScore = 0;
+		spamData[socket.ip].spamScore = 0;
 	}
 	module.exports = antiSpam;
 }).call(this);
