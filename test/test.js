@@ -7,7 +7,8 @@ var antiSpam = require('../antispam');
 var passed = false;
 var passedBan = false;
 var disconnected = false;
-clientSocket = clientIo.connect('http://127.0.0.1:3000');
+var times = 0;
+clientSocket = clientIo.connect('http://127.0.0.1:3000',{'forceNew':true });
 
 var antiSpam = new antiSpam({
 	spamCheckInterval: 3000,
@@ -21,23 +22,44 @@ var antiSpam = new antiSpam({
 });
 
 function repeat(){
-	if(disconnected) return;
+	if(disconnected){
+		times++;
+		if(times>=4){
+			disconnected = true;
+			return;
+		}
+		console.log("RECONNEECT");
+		clientSocket = clientIo.connect('http://127.0.0.1:3000',{'forceNew':true });
+		clientSocket.on("connect", function(){
+			console.log("ON CONNECT!");
+			disconnected = false;
+		});
+		clientSocket.on("reconnect", function(){
+			console.log("ON RECONNECT!");
+			disconnected = false;
+		});
+		clientSocket.on("disconnect", function(){
+			console.log("ON DISCONNECT!");
+			disconnected = true;
+		});
+		disconnected = false;
+		return;
+	}
 	clientSocket.emit('spamming', { some: 'data' });
 	setTimeout(function(){ repeat(); },250);
 }
 clientSocket.on("connect", function(){
-	repeat();
+	console.log("ON CONNECT!");
+	disconnected = false;
+});
+clientSocket.on("reconnect", function(){
+	console.log("ON RECONNECT!");
+	disconnected = false;
 });
 clientSocket.on("disconnect", function(){
+	console.log("ON DISCONNECT!");
 	disconnected = true;
 });
-clientSocket.on("spamscore", function(score){
-});
-setInterval(function(){
-	if(!disconnected) return;
-	if(passed == true) passedBan = true;
-	passed = true;
-},10);
 
 io.sockets.on('connection', function (socket) {
 	antiSpam.onConnect(socket);
@@ -49,13 +71,22 @@ io.sockets.on('connection', function (socket) {
 describe("Internal", function(){
 	this.timeout(5000);
 	var passedInt;
+	var passedInt2;
 	it('Connect to the webserver, spam socket.emits and get disconnect/kicked', function(done){
-		passedInt = setInterval(function(){
-			if(passed == true){
-				clearInterval(passedInt);
-				done();
-			}
-		},10);
+		var spammerino = setInterval(function(){
+			repeat();
+			if(!disconnected) return;
+			clearInterval(spammerino);
+			done();
+		},100);
+	});
+	it('Again :)', function(done){
+		var spammerino = setInterval(function(){
+			repeat();
+			if(!disconnected) return;
+			clearInterval(spammerino);
+			done();
+		},100);
 	});
 });
 
