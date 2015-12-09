@@ -24,7 +24,7 @@
   },
   "license": "MIT",
   "dependencies": {
-    "console-debug": "^0.2.9"
+    "console-debug": "^0.3.0"
   },
   "devDependencies": {
     "request": "^2.67.0",
