@@ -6,16 +6,16 @@
 ![NPM](https://img.shields.io/badge/Node-%3E%3D0.10-green.svg)
 ![](https://img.shields.io/npm/dt/socket-anti-spam.svg)
 ![](https://img.shields.io/npm/l/express.svg)
-
+___
 # What it does
 
 Keeps track of how many socket.emit's a ip has submitted under a certain timeframe and determine if it is spammy behaviour.  
 If the module determined the user is spamming it will receive a temp ip ban. [Check the module in action via this .gif](https://bitbucket.org/repo/kR4677/images/1013607973-socketspam.gif)
-
-## Changelog
+___
+# Changelog
 
 https://github.com/michaeldegroot/socket-anti-spam/commits/master
-
+___
 #  Getting started
 
 ##### 1. Start by installing the package:
@@ -45,6 +45,6 @@ io.sockets.on('connection', function (socket) {
 });
 ````
 Now all sockets will be individually checked if they spam your socket.emits and if they do they will be disconnected, after to many repeated offenses they will be temp banned (ip based).
-
+___
 # Contact  
 You can contact me at specamps@gmail.com
