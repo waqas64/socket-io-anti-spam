@@ -8,6 +8,15 @@
 	spamEnableTempBan = true;
 	spamKicksBeforeTempBan = 3;
 	spamTempBanInMinutes = 10;
+	var Debug = require('console-debug');
+
+	var console = new Debug({
+		uncaughtExceptionCatch: false,
+		consoleFilter: [],
+		logToFile: false,
+		logFilter: [],
+		colors: true
+	}); 
 	
 	var antiSpam = function(set) {
 		antiSpam = set["spamCheckInterval"];
@@ -38,13 +47,6 @@
 		socket.emit = function() {
 			dat.addSpam(socket);
 			emit.apply(socket, arguments);
-		};
-
-		var dat = this;
-		var $emit = socket.$emit;
-		socket.$emit = function() {
-			dat.addSpam(socket);
-			$emit.apply(socket, arguments);
 		};
 		if(typeof(spamCheckInterval)=="undefined") spamCheckInterval = setInterval(this.checkSpam,antiSpam);
 		if(typeof(spamKickCountInterval)=="undefined") spamKickCountInterval = setInterval(this.removeKickCount, removeKickCountAfter);
@@ -83,7 +85,7 @@
 		for(user in spamData){
 			if(spamData[user].spamScore>=1) spamData[user].spamScore-=antiSpamRemove;
 		}
-		return;
+		return true;
 	}
 	
 	antiSpam.prototype.authenticate = function(socket){
@@ -91,8 +93,6 @@
 		var address = socket.handshake.address;
 		socket.ip = address.address;
 		if(address.address==undefined) socket.ip = address;
-		console.log(address);
-		console.log("------------------------------------");
 		
 		if(typeof(spamData[socket.ip])=="undefined"){
 			spamData[socket.ip] = {

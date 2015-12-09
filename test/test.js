@@ -28,18 +28,14 @@ function repeat(){
 			disconnected = true;
 			return;
 		}
-		console.log("RECONNEECT");
 		clientSocket = clientIo.connect('http://127.0.0.1:3000',{'forceNew':true });
 		clientSocket.on("connect", function(){
-			console.log("ON CONNECT!");
 			disconnected = false;
 		});
 		clientSocket.on("reconnect", function(){
-			console.log("ON RECONNECT!");
 			disconnected = false;
 		});
 		clientSocket.on("disconnect", function(){
-			console.log("ON DISCONNECT!");
 			disconnected = true;
 		});
 		disconnected = false;
@@ -49,15 +45,12 @@ function repeat(){
 	setTimeout(function(){ repeat(); },250);
 }
 clientSocket.on("connect", function(){
-	console.log("ON CONNECT!");
 	disconnected = false;
 });
 clientSocket.on("reconnect", function(){
-	console.log("ON RECONNECT!");
 	disconnected = false;
 });
 clientSocket.on("disconnect", function(){
-	console.log("ON DISCONNECT!");
 	disconnected = true;
 });
 
@@ -80,7 +73,10 @@ describe("Internal", function(){
 			done();
 		},100);
 	});
-	it('Again :)', function(done){
+	it('checkSpam', function(){
+		assert.equal(antiSpam.checkSpam(),true);
+	});
+	it('Get Banned', function(done){
 		var spammerino = setInterval(function(){
 			repeat();
 			if(!disconnected) return;
@@ -88,7 +84,7 @@ describe("Internal", function(){
 			done();
 		},100);
 	});
-	it('Remove kickcount', function(){
+	it('Remove a kickcount', function(){
 		assert.doesNotThrow(function(){
 			antiSpam.removeKickCount();
 		});
