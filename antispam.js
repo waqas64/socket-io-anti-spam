@@ -1,117 +1,105 @@
-(function() {
-	Debug = false;
-	spamData = new Object();
-	antiSpam = 3000;
-	antiSpamRemove = 3;
-	removeKickCountAfter = 1;
-	maxSpam = 12;
-	spamEnableTempBan = true;
-	spamKicksBeforeTempBan = 3;
-	spamTempBanInMinutes = 10;
-	var Debug = require('console-debug');
+var moment = require('moment')
+var not = require('nott')
+var options = {
+  banTime: 60,
+  kickThreshold: 10,
+  kickTimesBeforeBan: 3
+}
 
-	var console = new Debug({
-		uncaughtExceptionCatch: false,
-		consoleFilter: [],
-		logToFile: false,
-		logFilter: [],
-		colors: true
-	}); 
-	
-	var antiSpam = function(set) {
-		antiSpam = set["spamCheckInterval"];
-		antiSpamRemove = set["spamMinusPointsPerInterval"];
-		maxSpam = set["spamMaxPointsBeforeKick"] + (antiSpam/1000);
-		spamEnableTempBan = set["spamEnableTempBan"];
-		spamKicksBeforeTempBan = set["spamKicksBeforeTempBan"];
-		spamTempBanInMinutes = set["spamTempBanInMinutes"]*60000;
-		removeKickCountAfter = set["removeKickCountAfter"]*60000;
-		Debug = set["debug"];
-	}
+var users = {}
 
-	antiSpam.prototype.addSpam = function(socket){
-		if(socket.spamViolated) return;
-		spamData[socket.ip].spamScore+=1;
-		if(Debug) console.log(spamData[socket.ip]);
-		this.maxSpamCheck(socket);
-	}
-	
-	antiSpam.prototype.getSpamScore = function(socket){
-		if(spamData[socket.ip]!=undefined) return spamData[socket.ip].spamScore;
-	}
-	
-	antiSpam.prototype.onConnect = function(socket){
-		this.authenticate(socket);
-		var dat = this;
-		var emit = socket.emit;
-		socket.emit = function() {
-			dat.addSpam(socket);
-			emit.apply(socket, arguments);
-		};
-		if(typeof(spamCheckInterval)=="undefined") spamCheckInterval = setInterval(this.checkSpam,antiSpam);
-		if(typeof(spamKickCountInterval)=="undefined") spamKickCountInterval = setInterval(this.removeKickCount, removeKickCountAfter);
-	}
-	antiSpam.prototype.removeKickCount = function(){
-		for(user in spamData){
-			if(spamData[user].kickCount>=1) {
-				if(Debug) console.log("[ " + user + " ] is lowering his kickcount with 1, current kickcount: "+spamData[user].kickCount);
-				spamData[user].kickCount--; 
-			}
-		}
-	}
-	
-	antiSpam.prototype.maxSpamCheck = function(socket){
-		if(spamData[socket.ip].spamScore>=maxSpam && !socket.spamViolated){
-		if(spamData[socket.ip].banned) return;
-		  socket.spamViolated = true;
-		  spamData[socket.ip].kickCount++;
-		  if(spamData[socket.ip].kickCount>=spamKicksBeforeTempBan && spamEnableTempBan){
-				if(Debug) console.log("[ "+socket.id + " / "+socket.ip+" ] temp banned.");
-				spamData[socket.ip].banned = true;
-				spamData[socket.ip].timeout = setTimeout(function(socket){
-					spamData[socket.ip] = {
-						spamScore: 0,
-						kickCount: 0,
-						banned: false,
-						timeout: 0
-					}
-				}, spamTempBanInMinutes, socket);
-		  }
-		  socket.disconnect();
-	   }
-	}
-	
-	antiSpam.prototype.checkSpam = function(){
-		for(user in spamData){
-			if(spamData[user].spamScore>=1) spamData[user].spamScore-=antiSpamRemove;
-		}
-		return true;
-	}
-	
-	antiSpam.prototype.authenticate = function(socket){
-		socket.spamViolated = false;
-		var address = socket.handshake.address;
-		socket.ip = address.address;
-		if(address.address==undefined) socket.ip = address;
-		
-		if(typeof(spamData[socket.ip])=="undefined"){
-			spamData[socket.ip] = {
-				spamScore: 0,
-				kickCount: 0,
-				banned: false,
-				timeout: 0
-			}
-			return;
-		}
-		if(spamData[socket.ip].banned){
-			if(Debug){
-				timeout = spamData[socket.ip].timeout;
-				left = Math.ceil((timeout._idleStart + timeout._idleTimeout - Date.now()) / 1000);
-				if(Debug) console.log("[ "+socket.id + " / "+socket.ip+" ] is still banned for "+left+" seconds");
-			}
-			socket.disconnect();
-		}
-		spamData[socket.ip].spamScore = 0;
-	}
-	module.exports = antiSpam;
-}).call(this);
+exports.init = function(sets) {
+  if(not(sets.banTime)) sets.banTime = 60
+  if(not(sets.kickThreshold)) sets.kickThreshold = 10
+  if(not(sets.kickTimesBeforeBan)) sets.kickTimesBeforeBan = 3
+  options = sets
+}
+
+exports.onConnect = function(socket,cb){
+  if(not(cb)) throw new Error("No callback defined")
+  
+  var emit = socket.emit
+  socket.emit = function() {
+    addSpam(socket)
+    emit.apply(socket, arguments)
+  }
+  authenticate(socket, cb)
+}
+
+function addSpam(socket){
+  if(not(socket)) throw new Error("socket variable is not defined");
+  exists(socket, function(err,data){
+    if(err) throw new Error(err)
+    if(data.banned) return;
+    
+    if(data.score>=options.kickThreshold){
+      data.score = 0
+      data.kickCount = data.kickCount + 1
+      if(data.kickCount>=options.kickTimesBeforeBan){
+        data.kickCount = 0
+        data.banned = true
+        data.bannedUntil = moment().add(options.banTime, 'minutes')
+      }
+      socket.disconnect()
+    }
+    data.score++
+  })
+}
+
+function authenticate(socket, cb){
+  exists(socket, function(err,data){
+    if(err) return(cb(err,null))
+    if(data.banned){
+      if(data.bannedUntil.diff(moment(), 'seconds')<=0){
+        data.banned = false
+      }else{
+        socket.disconnect()
+      }
+    }
+    cb(null,data);
+  })
+}
+
+function exists(socket, cb){
+  if(not(cb)) throw new Error("No callback defined")
+  if(not(socket)) return(cb("socket variable is not defined",null))
+  if(not(socket.ip)) socket.ip = socket.client.request.headers['x-forwarded-for'] || socket.client.conn.remoteAddress
+  if(typeof(users[socket.ip])!="undefined"){
+    cb(null,users[socket.ip])
+  }else{
+    users[socket.ip] = {
+      score: 0,
+      banned: false,
+      kickCount: 0,
+      bannedUntil: 0
+    }
+    cb(null,users[socket.ip])
+  }
+}
+
+exports.getBans = function(){
+  var banned = [];
+  for(user in users){
+    if(users[user].banned) banned.push({ip:user,until:users[user].bannedUntil})
+  }
+  return banned;
+}
+
+exports.lowerScore = function(){
+  for(user in users){
+    if(users[user].score>=1) users[user].score = users[user].score - 1;
+  }
+  return true;
+}
+
+exports.lowerKickCount = function(){
+  for(user in users){
+    if(users[user].kickCount>=1) users[user].kickCount = users[user].kickCount - 1
+  }
+  return true;
+}
+
+setInterval(exports.lowerScore,1000);
+setInterval(exports.lowerKickCount,1800000);
+
+exports.antiSpam = exports

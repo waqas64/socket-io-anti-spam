@@ -11,11 +11,27 @@ ___
 Keeps track of how many socket.emit's a ip has submitted under a certain timeframe and determine if it is spammy behaviour.  
 If the module determined the user is spamming it will receive a temp ip ban. 
 
-[You can see a demo of the module in action here](https://bitbucket.org/repo/kR4677/images/1013607973-socketspam.gif)
+
+___
+# How it works
+All connected sockets will have a object binded to them full of information that socket-anti-spam keeps track of.   
+This includes how much 'spamScore' someone has. If a socket is doing a socket.emit his spamScore will increase.   
+The module will give all sockets connected a -1 spamScore every second.  
+if the spamScore is above a certain spamScore threshold the socket will be disconnected.   
+If the socket keeps spamming after a certain kick threshold, the socket will be temp ip banned.
+
+
+
+[You can see a demo of the module in action here, please remember that this is from previous versions and the appearances might look different](https://bitbucket.org/repo/kR4677/images/1013607973-socketspam.gif)
+___
+# Important!!!!
+__Version 1.0.0 is released, it is a complete rewrite of the module. Please check the documentation!__
+
 ___
 # Changelog
 
-https://github.com/michaeldegroot/socket-anti-spam/commits/master
+
+[https://github.com/michaeldegroot/socket-anti-spam/commits/master](https://github.com/michaeldegroot/socket-anti-spam/commits/master)
 ___
 #  Getting started
 
@@ -25,22 +41,60 @@ ___
 ##### 2. Load the code
 ```javascript
 var antiSpam = require('socket-anti-spam');
-var antiSpam = new antiSpam({
-	spamCheckInterval: 3000,        // in how many miliseconds do users get -1 spamscore point
-	spamMinusPointsPerInterval: 3,  // how many spamscore points must be added after the spamCheckInterval?
-	spamMaxPointsBeforeKick: 9,     // needed spamscore points before kick
-	spamEnableTempBan: true,        // Enable temp bans (ban users after x amount of kicks within x amount of time)
-	spamKicksBeforeTempBan: 3,      // This many kicks needed for a temp ban
-	spamTempBanInMinutes: 10,       // This many minutes temp ban will be active
-	removeKickCountAfter: 1,        // This many minutes until the kick counter is decreasing with 1 for the user
-	debug: false                    // debug? not needed unless you have problems :)
+antiSpam.init({
+    banTime: 30,            // Ban time in minutes
+    kickThreshold: 2,       // User gets kicked after this many spam score
+    kickTimesBeforeBan: 1   // User gets banned after this many kicks
 });
 
 io.sockets.on('connection', function (socket) {
-	antiSpam.onConnect(socket); // Add this line in your on connection event
+    
+     // Add this line after your on connection event
+    antiSpam.onConnect(socket, function(err,data){
+        if(err) console.log(err);
+        console.log(data) // returns antiSpam user object, useful for more information
+    });
+    
+    // The rest of your code
 });
 ````
 _Now all sockets will be individually checked if they spam your socket.emits and if they do they will be disconnected, after to many repeated offenses they will be temp banned (ip based)._
+___
+## API
+
+###  .onConnect(socket, callback)
+```js
+socket:     Object      // The user socket variable
+callback:   Function    // Returns err, data
+```
+_This is called after the on connection event for your sockets_  
+__IMPORTANT__: _You have to use .onConnect or the module will __FAIL___
+
+__Example__
+
+````js
+var io = require('socket.io');
+var antiSpam = require('socket-anti-spam');
+
+io.sockets.on('connection', function (socket) {
+	antiSpam.onConnect(socket, function(err,data){
+        if(err) console.log(err);
+    });
+});
+````
+
+###  .getBans()
+_Returns a array full of ip's that are currently banned_  
+
+__Example__
+
+````js
+var antiSpam = require('socket-anti-spam');
+
+var bans = antiSpam.getBans();
+console.log(bans)   // Returns a array full of ip's that are currently banned
+````
+
 ___
 # Contact  
 You can contact me at specamps@gmail.com

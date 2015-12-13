@@ -1,7 +1,7 @@
 {
   "name": "socket-anti-spam",
-  "version": "0.2.7",
-  "description": "Tired of users spamming your socket.io emits? this module prevents this",
+  "version": "1.0.0",
+  "description": "This module prevents socket.emit spams by clients via ip bans",
   "main": "antispam.js",
   "scripts": {
     "test": "mocha",
@@ -24,7 +24,9 @@
   },
   "license": "MIT",
   "dependencies": {
-    "console-debug": "^0.3.0"
+    "console-debug": "^0.3.0",
+    "moment": "^2.10.6",
+    "nott": "^0.0.3"
   },
   "devDependencies": {
     "request": "^2.67.0",

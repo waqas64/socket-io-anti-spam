@@ -4,3 +4,5 @@ node_modules
 npm-debug.log
 .coveralls.yml
 coverage
+localtest.js
+public

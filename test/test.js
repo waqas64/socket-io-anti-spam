@@ -10,17 +10,6 @@ var disconnected = false;
 var times = 0;
 clientSocket = clientIo.connect('http://127.0.0.1:3000',{'forceNew':true });
 
-var antiSpam = new antiSpam({
-	spamCheckInterval: 3000,
-	spamMinusPointsPerInterval: 3,
-	spamMaxPointsBeforeKick: 12,
-	spamEnableTempBan: true,
-	spamKicksBeforeTempBan: 3,
-	spamTempBanInMinutes: 10,
-	removeKickCountAfter: 1,
-	debug: true
-});
-
 function repeat(){
 	if(disconnected){
 		times++;
@@ -54,15 +43,18 @@ clientSocket.on("disconnect", function(){
 	disconnected = true;
 });
 
+
 io.sockets.on('connection', function (socket) {
-	antiSpam.onConnect(socket);
-	socket.on("spamming", function() {
-		socket.emit("spamscore", antiSpam.getSpamScore(socket));
-	});
+	antiSpam.onConnect(socket, function(err,data){
+    if(err) console.log(err);
+  });
+  socket.on("spamming", function() {
+    socket.emit("spamscore",null);
+  });
 });
 
 describe("Internal", function(){
-	this.timeout(5000);
+	this.timeout(1000);
 	var passedInt;
 	var passedInt2;
 	it('Connect to the webserver, spam socket.emits and get disconnect/kicked', function(done){
@@ -71,10 +63,7 @@ describe("Internal", function(){
 			if(!disconnected) return;
 			clearInterval(spammerino);
 			done();
-		},100);
-	});
-	it('checkSpam', function(){
-		assert.equal(antiSpam.checkSpam(),true);
+		},1);
 	});
 	it('Get Banned', function(done){
 		var spammerino = setInterval(function(){
@@ -82,12 +71,46 @@ describe("Internal", function(){
 			if(!disconnected) return;
 			clearInterval(spammerino);
 			done();
-		},100);
+		},1);
 	});
-	it('Remove a kickcount', function(){
-		assert.doesNotThrow(function(){
-			antiSpam.removeKickCount();
-		});
+	it('Confirm ban', function(){
+		var lengthy = antiSpam.getBans().length
+    assert.equal(lengthy,1);
+	});
+	it('Get Ban list', function(){
+    assert.object(antiSpam.getBans());
+	});
+	it('Call init', function(){
+    antiSpam.init({
+      banTime: 30,            // Ban time in minutes
+      kickThreshold: 2,       // User gets kicked after this many spam score
+      kickTimesBeforeBan: 1   // User gets banned after this many kicks
+    });
+	});
+	it('Call init with only banTime', function(){
+    antiSpam.init({
+      banTime: 30,            // Ban time in minutes
+    });
+	});
+	it('Call init with only kickThreshold', function(){
+    antiSpam.init({
+      kickThreshold: 2,       // User gets kicked after this many spam score
+    });
+	});
+	it('Call init with only kickTimesBeforeBan', function(){
+    antiSpam.init({
+      kickTimesBeforeBan: 1   // User gets banned after this many kicks
+    });
+	});
+	it('Call on connect without a callback', function(){
+    assert.throws(function(){
+      antiSpam.onConnect("test");
+    },Error);
+	});
+	it('Call lowerScore()', function(){
+    assert.equal(antiSpam.lowerScore(),true);
+	});
+	it('Call lowerKickCount()', function(){
+    assert.equal(antiSpam.lowerKickCount(),true);
 	});
 });
-
