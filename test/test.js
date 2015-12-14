@@ -12,6 +12,9 @@ var disconnected = false
 var times = 0
 var clientSocket = clientIo.connect('http://127.0.0.1:3000',{'forceNew':true })
 
+var ip = "::ffff:127.0.0.1";
+if(process.version=="v0.10.41") ip = "127.0.0.1"
+
 function repeat(){
 	if(disconnected){
 		times++
@@ -80,7 +83,7 @@ describe("Internal", function(){
     assert.equal(lengthy,1)
 	})
 	it('Get Ban list', function(){
-    assert.equal(antiSpam.getBans()[0].ip,"::ffff:127.0.0.1")
+    if(assert.equal(antiSpam.getBans()[0].ip,ip)
 	})
 	it('Call init', function(){
     antiSpam.init({
@@ -116,16 +119,16 @@ describe("Internal", function(){
     assert.equal(antiSpam.lowerKickCount(),true)
 	})
   it('unBan ip', function(){
-    antiSpam.unBan("::ffff:127.0.0.1")
+    antiSpam.unBan(ip)
     assert.equal(antiSpam.getBans().length,0)
   })
   it('ban ip', function(){
-    antiSpam.ban("::ffff:127.0.0.1")
-    assert.equal(antiSpam.getBans()[0].ip,"::ffff:127.0.0.1")
+    antiSpam.ban(ip)
+    assert.equal(antiSpam.getBans()[0].ip,ip)
   })
   it('ban ip for 1 minute', function(){
-    antiSpam.unBan("::ffff:127.0.0.1")
-    antiSpam.ban("::ffff:127.0.0.1",1)
-    assert.equal(antiSpam.getBans()[0].ip,"::ffff:127.0.0.1")
+    antiSpam.unBan(ip)
+    antiSpam.ban(ip,1)
+    assert.equal(antiSpam.getBans()[0].ip,ip)
   })
 })
