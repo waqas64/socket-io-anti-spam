@@ -13,7 +13,7 @@ var times = 0
 var clientSocket = clientIo.connect('http://127.0.0.1:3000',{'forceNew':true })
 
 var ip = "::ffff:127.0.0.1";
-if(process.version=="v0.10.41") ip = "127.0.0.1"
+if(process.version=="v0.10.41") ip = "127.0.0.1";
 
 function repeat(){
 	if(disconnected){
@@ -83,7 +83,7 @@ describe("Internal", function(){
     assert.equal(lengthy,1)
 	})
 	it('Get Ban list', function(){
-    if(assert.equal(antiSpam.getBans()[0].ip,ip)
+    assert.equal(antiSpam.getBans()[0].ip,ip)
 	})
 	it('Call init', function(){
     antiSpam.init({
