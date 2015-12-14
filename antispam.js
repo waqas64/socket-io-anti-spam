@@ -1,17 +1,20 @@
+'use strict'
+
 var moment = require('moment')
 var not = require('nott')
-var options = {
+var defaultOptions = {
   banTime: 60,
   kickThreshold: 10,
   kickTimesBeforeBan: 3
 }
+var options = defaultOptions
 
 var users = {}
 
 exports.init = function(sets) {
-  if(not(sets.banTime)) sets.banTime = 60
-  if(not(sets.kickThreshold)) sets.kickThreshold = 10
-  if(not(sets.kickTimesBeforeBan)) sets.kickTimesBeforeBan = 3
+  if(not(sets.banTime)) sets.banTime = defaultOptions.banTime
+  if(not(sets.kickThreshold)) sets.kickThreshold = defaultOptions.kickThreshold
+  if(not(sets.kickTimesBeforeBan)) sets.kickTimesBeforeBan = defaultOptions.kickTimesBeforeBan
   options = sets
 }
 
@@ -30,7 +33,7 @@ function addSpam(socket){
   if(not(socket)) throw new Error("socket variable is not defined");
   exists(socket, function(err,data){
     if(err) throw new Error(err)
-    if(data.banned) return;
+    if(data.banned) return
     
     if(data.score>=options.kickThreshold){
       data.score = 0
@@ -56,7 +59,7 @@ function authenticate(socket, cb){
         socket.disconnect()
       }
     }
-    cb(null,data);
+    cb(null,data)
   })
 }
 
@@ -77,8 +80,38 @@ function exists(socket, cb){
   }
 }
 
+exports.ban = function(data){
+  var ip = false
+  if(typeof(users[data])!="undefined") ip = data
+  if(typeof(users[data.ip])!="undefined") ip = data.ip
+  if(ip) return ban(true,ip)
+  return false;
+}
+
+exports.unBan = function(data){
+  var ip = false
+  if(typeof(users[data])!="undefined") ip = data
+  if(typeof(users[data.ip])!="undefined") ip = data.ip
+  if(ip) return ban(false,ip)
+  return false
+}
+
+function ban(ban,data){
+  users[data].kickCount = 0
+  users[data].score = 0
+  if(ban){
+    users[data].banned = true
+    users[data].bannedUntil = moment().add(options.banTime, 'minutes')
+  }else{
+    users[data].banned = false
+    users[data].bannedUntil = 0
+  }
+  return true
+}
+
 exports.getBans = function(){
-  var banned = [];
+  var banned = []
+  var user
   for(user in users){
     if(users[user].banned) banned.push({ip:user,until:users[user].bannedUntil})
   }
@@ -86,20 +119,22 @@ exports.getBans = function(){
 }
 
 exports.lowerScore = function(){
+  var user
   for(user in users){
     if(users[user].score>=1) users[user].score = users[user].score - 1;
   }
-  return true;
+  return true
 }
 
 exports.lowerKickCount = function(){
+  var user
   for(user in users){
     if(users[user].kickCount>=1) users[user].kickCount = users[user].kickCount - 1
   }
-  return true;
+  return true
 }
 
-setInterval(exports.lowerScore,1000);
-setInterval(exports.lowerKickCount,1800000);
+setInterval(exports.lowerScore,1000)
+setInterval(exports.lowerKickCount,1800000)
 
 exports.antiSpam = exports
