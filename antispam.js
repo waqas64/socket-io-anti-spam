@@ -80,7 +80,8 @@ function exists(socket, cb){
   }
 }
 
-exports.ban = function(data){
+exports.ban = function(data,min){
+  if(not(min)) min = options.banTime;
   var ip = false
   if(typeof(users[data])!="undefined") ip = data
   if(typeof(users[data.ip])!="undefined") ip = data.ip
@@ -96,12 +97,12 @@ exports.unBan = function(data){
   return false
 }
 
-function ban(ban,data){
+function ban(ban,data,min){
   users[data].kickCount = 0
   users[data].score = 0
   if(ban){
     users[data].banned = true
-    users[data].bannedUntil = moment().add(options.banTime, 'minutes')
+    users[data].bannedUntil = moment().add(min, 'minutes')
   }else{
     users[data].banned = false
     users[data].bannedUntil = 0

@@ -77,7 +77,7 @@ var io = require('socket.io');
 var antiSpam = require('socket-anti-spam');
 
 io.sockets.on('connection', function (socket) {
-	antiSpam.onConnect(socket, function(err,data){
+    antiSpam.onConnect(socket, function(err,data){
         if(err) console.log(err);
     });
 });
@@ -93,6 +93,53 @@ var antiSpam = require('socket-anti-spam');
 
 var bans = antiSpam.getBans();
 console.log(bans)   // Returns a array full of ip's that are currently banned
+````
+###  .ban(data,minutes)
+```js
+data:       Object / String     //  Can be either socket.ip or a ip in string format you want to ban
+minutes:    Number              // Number in minutes how long the ban will be active, if not supplied default will be used (60)
+```
+_Simply bans a socket or ip_  
+
+__Example__ banning a ip in string format
+
+````js
+var antiSpam = require('socket-anti-spam');
+
+antiSpam.ban("127.0.0.1") // Bye!
+````
+
+__Example__ banning a socket, and set ban time for 5 minutes
+
+````js
+var antiSpam = require('socket-anti-spam');
+
+io.sockets.on('connection', function (socket) {
+    antiSpam.ban(socket, 5);
+});
+````
+###  .unBan(data)
+```js
+data:   Object / String    //  Can be either socket.ip or a ip in string format you want to unban
+```
+_Simply unbans a socket or ip_  
+
+__Example__ unbanning a ip in string format
+
+````js
+var antiSpam = require('socket-anti-spam');
+
+antiSpam.unban("127.0.0.1") // He's back!
+````
+
+__Example__ unbanning a socket
+
+````js
+var antiSpam = require('socket-anti-spam');
+
+io.sockets.on('connection', function (socket) {
+    antiSpam.unBan(socket);
+});
 ````
 
 ___

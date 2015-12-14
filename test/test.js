@@ -123,4 +123,9 @@ describe("Internal", function(){
     antiSpam.ban("::ffff:127.0.0.1")
     assert.equal(antiSpam.getBans()[0].ip,"::ffff:127.0.0.1")
   })
+  it('ban ip for 1 minute', function(){
+    antiSpam.unBan("::ffff:127.0.0.1")
+    antiSpam.ban("::ffff:127.0.0.1",1)
+    assert.equal(antiSpam.getBans()[0].ip,"::ffff:127.0.0.1")
+  })
 })
