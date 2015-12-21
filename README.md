@@ -8,7 +8,7 @@
 ___
 # What it does
 
-Keeps track of how many socket.emit's a ip has submitted under a certain timeframe and determine if it is spammy behaviour.  
+Keeps track of how many socket.emit's (client emits) a ip has submitted under a certain timeframe and determine if it is spammy behaviour.  
 If the module determined the user is spamming it will receive a temp ip ban. 
 
 
@@ -41,34 +41,27 @@ ___
 ##### 2. Load the code
 ```javascript
 var antiSpam = require('socket-anti-spam');
+var socket-io = require('socket.io').listen(8080);
+
 antiSpam.init({
     banTime: 30,            // Ban time in minutes
     kickThreshold: 2,       // User gets kicked after this many spam score
     kickTimesBeforeBan: 1   // User gets banned after this many kicks
-});
-
-io.sockets.on('connection', function (socket) {
-    
-     // Add this line after your on connection event
-    antiSpam.onConnect(socket, function(err,data){
-        if(err) console.log(err);
-        console.log(data) // returns antiSpam user object, useful for more information
-    });
-    
-    // The rest of your code
+    banning: true,          // Uses temp IP banning after kickTimesBeforeBan
+    heartBeatStale: 40,     // Removes a heartbeat after this many seconds
+    heartBeatCheck: 4,      // Checks a heartbeat per this many seconds
+    io: socket-io,          // Bind the socket.io variable
 });
 ````
 _Now all sockets will be individually checked if they spam your socket.emits and if they do they will be disconnected, after to many repeated offenses they will be temp banned (ip based)._
 ___
 ## API
 
-###  .onConnect(socket, callback)
+###  .addSpam(socket)
 ```js
 socket:     Object      // The user socket variable
-callback:   Function    // Returns err, data
 ```
-_This is called after the on connection event for your sockets_  
-__IMPORTANT__: _You have to use .onConnect or the module will __FAIL___
+_Can be used to increase the spam score of a socket, if you set the io variable in the init function you do not need this. Unless you want to do something other then adding a spamscore for every client emit_  
 
 __Example__
 
@@ -77,9 +70,11 @@ var io = require('socket.io');
 var antiSpam = require('socket-anti-spam');
 
 io.sockets.on('connection', function (socket) {
-    antiSpam.onConnect(socket, function(err,data){
-        if(err) console.log(err);
-    });
+    socket.on('chatMessage', function(){
+        antiSpam.addSpam(socket) // Adds a spamscore because this socket sent a emit
+        
+        // The rest of your code
+    })
 });
 ````
 

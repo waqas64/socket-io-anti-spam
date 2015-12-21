@@ -13,7 +13,11 @@ var antiSpam = require('./antispam');
 antiSpam.init({
   banTime: 30,            // Ban time in minutes
 	kickThreshold: 2,       // User gets kicked after this many spam score
-  kickTimesBeforeBan: 1   // User gets banned after this many kicks
+  kickTimesBeforeBan: 1,  // User gets banned after this many kicks
+  banning: true,          // Uses temp IP banning after kickTimesBeforeBan
+  heartBeatStale: 40,     // Removes a heartbeat after this many seconds
+  heartBeatCheck: 4,      // Checks a heartbeat per this many seconds
+  io: io,                  // Bind the socketio variable
 });
 
 // Lets create server for index.html
@@ -24,11 +28,6 @@ http.createServer(function (req, res) {
  // Everyone has this line already when using socket-anti-spam
 io.sockets.on('connection', function (socket) {
   console.log(antiSpam.getBans())
-  
-	// This is actually needed to be added by the user only
-	antiSpam.onConnect(socket, function(err,data){
-    if(err) console.log(err);
-  });
 	
 	 // Extra socket function for testing purposes so we can spam something :3
 	socket.on("spamming", function() {

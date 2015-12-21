@@ -2,31 +2,44 @@
 
 var moment = require('moment')
 var not = require('nott')
+
 var defaultOptions = {
   banTime: 60,
   kickThreshold: 10,
-  kickTimesBeforeBan: 3
+  kickTimesBeforeBan: 3,
+  banning: true,
+  heartBeatStale: 40,
+  heartBeatCheck: 4,
 }
 var options = defaultOptions
-
 var users = {}
 var heartbeats = {}
+
 exports.init = function(sets) {
   if(not(sets.banTime)) sets.banTime = defaultOptions.banTime
   if(not(sets.kickThreshold)) sets.kickThreshold = defaultOptions.kickThreshold
   if(not(sets.kickTimesBeforeBan)) sets.kickTimesBeforeBan = defaultOptions.kickTimesBeforeBan
-  options = sets
-}
-
-exports.onConnect = function(socket,cb){
-  if(not(cb)) throw new Error("No callback defined")
-  
-  var emit = socket.emit
-  socket.emit = function() {
-    exports.addSpam(socket)
-    emit.apply(socket, arguments)
+  if(not(sets.banning)) sets.banning = defaultOptions.banning
+  if(not(sets.heartBeatStale)) sets.heartBeatStale = defaultOptions.heartBeatStale
+  if(not(sets.heartBeatCheck)) sets.heartBeatCheck = defaultOptions.heartBeatCheck
+  if(sets.io){
+    sets.io.on('connection', function (socket) {
+      var emit = socket.emit
+      socket.emit = function() {
+        exports.addSpam(socket)
+        emit.apply(socket, arguments)
+      }
+      authenticate(socket, function(err,data){
+        if(err) throw new Error(err)
+      })
+      
+      socket.on('disconnect', function(){
+        clearHeart(socket)
+      })
+    })
   }
-  authenticate(socket, cb)
+  
+  options = sets
 }
 
 exports.addSpam = function(socket){
@@ -38,8 +51,8 @@ exports.addSpam = function(socket){
     if(data.score>=options.kickThreshold){
       data.score = 0
       data.kickCount = data.kickCount + 1
-      if(data.kickCount>=options.kickTimesBeforeBan){
-        clearInterval(heartbeats[socket.id].interval)
+      if(data.kickCount>=options.kickTimesBeforeBan && options.banning){
+        clearHeart(socket)
         data.kickCount = 0
         data.banned = true
         data.bannedUntil = moment().add(options.banTime, 'minutes')
@@ -50,20 +63,27 @@ exports.addSpam = function(socket){
   })
 }
 
+function clearHeart(socket){
+  if(!heartbeats[socket.id]) return
+  clearInterval(heartbeats[socket.id].interval)
+}
+
 function addHeart(socket){
-  if(heartbeats[socket.id]) clearInterval(heartbeats[socket.id].interval)
+  if(heartbeats[socket.id]) return
+  clearHeart(socket)
   heartbeats[socket.id] = {
-    interval: setInterval(checkHeart,2000,socket)
+    interval: setInterval(checkHeart,options.heartBeatCheck*1000,socket)
   }
 }
 
 function checkHeart(socket){
+  if(!heartbeats[socket.id]) return(clearHeart(socket))
   var startedSince = Math.round(heartbeats[socket.id].interval._idleStart/1000)
-  if(startedSince>=60) clearInterval(heartbeats[socket.id].interval)
+  if(startedSince>=options.heartBeatStale) clearHeart(socket)
   if(users[socket.ip]){
     if(users[socket.ip].banned){
       socket.disconnect()
-      clearInterval(heartbeats[socket.id].interval)
+      clearHeart(socket)
     }
   }
 }
@@ -72,7 +92,7 @@ function authenticate(socket, cb){
   exists(socket, function(err,data){
     if(err) return(cb(err,null))
     if(data.banned){
-      if(heartbeats[socket.id]) clearInterval(heartbeats[socket.id].interval)
+      if(heartbeats[socket.id]) clearHeart(socket)
       if(data.bannedUntil.diff(moment(), 'seconds')<=0){
         data.banned = false
       }else{

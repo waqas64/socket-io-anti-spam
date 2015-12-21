@@ -12,6 +12,16 @@ var disconnected = false
 var times = 0
 var clientSocket = clientIo.connect('http://127.0.0.1:3000',{'forceNew':true })
 
+antiSpam.init({
+  banTime: 30,            // Ban time in minutes
+  kickThreshold: 1,       // User gets kicked after this many spam score
+  kickTimesBeforeBan: 1,  // User gets banned after this many kicks
+  banning: true,          // Uses temp IP banning after kickTimesBeforeBan
+  heartBeatStale: 40,     // Removes a heartbeat after this many seconds
+  heartBeatCheck: 0.1,      // Checks a heartbeat per this many seconds
+  io: io,                  // Bind the socketio variable
+});
+
 var ip = "::ffff:127.0.0.1";
 if(process.version=="v0.10.41") ip = "127.0.0.1";
 
@@ -50,9 +60,6 @@ clientSocket.on("disconnect", function(){
 
 
 io.sockets.on('connection', function (socket) {
-	antiSpam.onConnect(socket, function(err,data){
-    if(err) console.log(err)
-  })
   socket.on("spamming", function() {
     socket.emit("spamscore",null)
   })
@@ -70,10 +77,10 @@ describe("Internal", function(){
 			done()
 		},1)
 	})
-  it('Wait 5 seconds for heartbeat', function(done){
+  it('Wait 100ms for heartbeat', function(done){
     setTimeout(function(done){
       done();
-    },5000,done);
+    },100,done);
   })
 	it('Get Banned', function(done){
 		var spammerino = setInterval(function(){
@@ -94,8 +101,12 @@ describe("Internal", function(){
     antiSpam.init({
       banTime: 30,            // Ban time in minutes
       kickThreshold: 2,       // User gets kicked after this many spam score
-      kickTimesBeforeBan: 1   // User gets banned after this many kicks
-    })
+      kickTimesBeforeBan: 1,  // User gets banned after this many kicks
+      banning: true,          // Uses temp IP banning after kickTimesBeforeBan
+      heartBeatStale: 40,     // Removes a heartbeat after this many seconds
+      heartBeatCheck: 4,      // Checks a heartbeat per this many seconds
+      io: io,                  // Bind the socketio variable
+    });
 	})
 	it('Call init with only banTime', function(){
     antiSpam.init({
