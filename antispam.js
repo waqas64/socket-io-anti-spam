@@ -26,9 +26,7 @@ exports.onConnect = function(socket,cb){
     exports.addSpam(socket)
     emit.apply(socket, arguments)
   }
-  addHeart(socket, function(){
-    authenticate(socket, cb)
-  })
+  authenticate(socket, cb)
 }
 
 exports.addSpam = function(socket){
@@ -52,13 +50,11 @@ exports.addSpam = function(socket){
   })
 }
 
-function addHeart(socket,cb){
-  if(not(cb)) throw new Error("No callback defined")
+function addHeart(socket){
   if(heartbeats[socket.id]) clearInterval(heartbeats[socket.id].interval)
   heartbeats[socket.id] = {
     interval: setInterval(checkHeart,2000,socket)
   }
-  cb(null)
 }
 
 function checkHeart(socket){
@@ -76,13 +72,14 @@ function authenticate(socket, cb){
   exists(socket, function(err,data){
     if(err) return(cb(err,null))
     if(data.banned){
-      clearInterval(heartbeats[socket.id].interval)
+      if(heartbeats[socket.id]) clearInterval(heartbeats[socket.id].interval)
       if(data.bannedUntil.diff(moment(), 'seconds')<=0){
         data.banned = false
       }else{
         socket.disconnect()
       }
     }
+    addHeart(socket)
     cb(null,data)
   })
 }
