@@ -10,7 +10,6 @@ var defaultOptions = {
 var options = defaultOptions
 
 var users = {}
-
 exports.init = function(sets) {
   if(not(sets.banTime)) sets.banTime = defaultOptions.banTime
   if(not(sets.kickThreshold)) sets.kickThreshold = defaultOptions.kickThreshold
@@ -23,13 +22,13 @@ exports.onConnect = function(socket,cb){
   
   var emit = socket.emit
   socket.emit = function() {
-    addSpam(socket)
+    exports.addSpam(socket)
     emit.apply(socket, arguments)
   }
   authenticate(socket, cb)
 }
 
-function addSpam(socket){
+exports.addSpam = function(socket){
   if(not(socket)) throw new Error("socket variable is not defined");
   exists(socket, function(err,data){
     if(err) throw new Error(err)
