@@ -59,7 +59,7 @@ io.sockets.on('connection', function (socket) {
 })
 
 describe("Internal", function(){
-	this.timeout(1000)
+	this.timeout(10000)
 	var passedInt
 	var passedInt2
 	it('Connect to the webserver, spam socket.emits and get disconnect/kicked', function(done){
@@ -70,6 +70,11 @@ describe("Internal", function(){
 			done()
 		},1)
 	})
+  it('Wait 5 seconds for heartbeat', function(done){
+    setTimeout(function(done){
+      done();
+    },5000,done);
+  })
 	it('Get Banned', function(done){
 		var spammerino = setInterval(function(){
 			repeat()

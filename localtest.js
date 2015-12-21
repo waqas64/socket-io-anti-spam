@@ -9,7 +9,7 @@ var http = require('http');
 var file = new static.Server('./public');
 
 // Actually needed for antispam
-var antiSpam = require('./antispam');
+var antiSpam = require('../antispam');
 antiSpam.init({
   banTime: 30,            // Ban time in minutes
 	kickThreshold: 2,       // User gets kicked after this many spam score
