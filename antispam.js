@@ -43,7 +43,7 @@ exports.init = function(sets) {
 }
 
 exports.addSpam = function(socket){
-  if(not(socket)) throw new Error("socket variable is not defined");
+  if(not(socket)) throw new Error("socket variable is not defined")
   authenticate(socket, function(err,data){
     if(err) throw new Error(err)
     if(data.banned) return
@@ -64,13 +64,11 @@ exports.addSpam = function(socket){
 }
 
 function clearHeart(socket){
-  if(not(socket)) throw new Error("socket variable is not defined");
   if(!heartbeats[socket.id]) return
   clearInterval(heartbeats[socket.id].interval)
 }
 
 function addHeart(socket){
-  if(not(socket)) throw new Error("socket variable is not defined");
   if(heartbeats[socket.id]) return
   clearHeart(socket)
   heartbeats[socket.id] = {
@@ -79,7 +77,6 @@ function addHeart(socket){
 }
 
 function checkHeart(socket){
-  if(not(socket)) throw new Error("socket variable is not defined");
   if(!heartbeats[socket.id]) return(clearHeart(socket))
   var startedSince = Math.round(heartbeats[socket.id].interval._idleStart/1000)
   if(startedSince>=options.heartBeatStale) clearHeart(socket)
@@ -92,15 +89,13 @@ function checkHeart(socket){
 }
 
 function authenticate(socket, cb){
-  if(not(cb)) throw new Error("No callback defined")
-  if(not(socket)) cb("Socket variable is not defined",null);
   exists(socket, function(err,data){
     if(err) return(cb(err,null))
     if(data.banned){
+      data.banned = false
       if(heartbeats[socket.id]) clearHeart(socket)
-      if(data.bannedUntil.diff(moment(), 'seconds')<=0){
-        data.banned = false
-      }else{
+      if(data.bannedUntil.diff(moment(), 'seconds')>=1){
+        data.banned = true
         socket.disconnect()
       }
     }
@@ -109,8 +104,6 @@ function authenticate(socket, cb){
   })
 }
 function exists(socket, cb){
-  if(not(cb)) throw new Error("No callback defined")
-  if(not(socket)) return(cb("socket variable is not defined",null))
   if(not(socket.ip)) socket.ip = socket.client.request.headers['x-forwarded-for'] || socket.client.conn.remoteAddress
   if(typeof(users[socket.ip])!="undefined"){
     cb(null,users[socket.ip])
@@ -132,7 +125,7 @@ exports.ban = function(data,min){
   if(typeof(users[data])!="undefined") ip = data
   if(typeof(users[data.ip])!="undefined") ip = data.ip
   if(ip) return ban(true,ip)
-  return false;
+  return false
 }
 
 exports.unBan = function(data){
@@ -163,13 +156,13 @@ exports.getBans = function(){
   for(user in users){
     if(users[user].banned) banned.push({ip:user,until:users[user].bannedUntil})
   }
-  return banned;
+  return banned
 }
 
 exports.lowerScore = function(){
   var user
   for(user in users){
-    if(users[user].score>=1) users[user].score = users[user].score - 1;
+    if(users[user].score>=1) users[user].score = users[user].score - 1
   }
   return true
 }

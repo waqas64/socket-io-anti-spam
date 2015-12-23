@@ -65,10 +65,10 @@ io.sockets.on('connection', function (socket) {
   })
 })
 
-describe("Internal", function(){
+
+
+describe("Ban system", function(){
 	this.timeout(10000)
-	var passedInt
-	var passedInt2
 	it('Connect to the webserver, spam socket.emits and get disconnect/kicked', function(done){
 		var spammerino = setInterval(function(){
 			repeat()
@@ -77,11 +77,6 @@ describe("Internal", function(){
 			done()
 		},1)
 	})
-  it('Wait 100ms for heartbeat', function(done){
-    setTimeout(function(done){
-      done();
-    },100,done);
-  })
 	it('Get Banned', function(done){
 		var spammerino = setInterval(function(){
 			repeat()
@@ -91,13 +86,35 @@ describe("Internal", function(){
 		},1)
 	})
 	it('Confirm ban', function(){
-		var lengthy = antiSpam.getBans().length
-    assert.equal(lengthy,1)
-	})
-	it('Get Ban list', function(){
     assert.equal(antiSpam.getBans()[0].ip,ip)
 	})
-	it('Call init', function(){
+  it('unBan ip', function(){
+    antiSpam.unBan(ip)
+    assert.equal(antiSpam.getBans().length,0)
+  })
+  it('ban ip', function(){
+    antiSpam.ban(ip)
+    assert.equal(antiSpam.getBans()[0].ip,ip)
+  })
+  it('ban ip for 1 ms', function(){
+    antiSpam.unBan(ip)
+    antiSpam.ban(ip,0.000000001)
+    assert.equal(antiSpam.getBans()[0].ip,ip)
+  })
+})
+
+describe("Heartbeat", function(){
+	this.timeout(10000)
+  it('Wait 100ms for heartbeat', function(done){
+    setTimeout(function(done){
+      done();
+    },100,done);
+  })
+})
+
+describe("Init function", function(){
+	this.timeout(10000)
+  it('Call init', function(){
     antiSpam.init({
       banTime: 30,            // Ban time in minutes
       kickThreshold: 2,       // User gets kicked after this many spam score
@@ -123,28 +140,44 @@ describe("Internal", function(){
       kickTimesBeforeBan: 1   // User gets banned after this many kicks
     })
 	})
-	it('Call on connect without a callback', function(){
-    assert.throws(function(){
-      antiSpam.onConnect("test")
-    },Error)
-	})
+})
+
+describe("Misc functions", function(){
+	this.timeout(10000)
 	it('Call lowerScore()', function(){
     assert.equal(antiSpam.lowerScore(),true)
 	})
 	it('Call lowerKickCount()', function(){
     assert.equal(antiSpam.lowerKickCount(),true)
 	})
-  it('unBan ip', function(){
-    antiSpam.unBan(ip)
-    assert.equal(antiSpam.getBans().length,0)
-  })
-  it('ban ip', function(){
-    antiSpam.ban(ip)
-    assert.equal(antiSpam.getBans()[0].ip,ip)
-  })
-  it('ban ip for 1 minute', function(){
-    antiSpam.unBan(ip)
-    antiSpam.ban(ip,1)
-    assert.equal(antiSpam.getBans()[0].ip,ip)
-  })
+})
+
+describe("Error Handling", function(){
+	this.timeout(10000)
+	it('Call authentication without a socket', function(){
+    assert.throws(function(){
+      antiSpam.authenticate("test")
+    },Error)
+	})
+	it('Call ban without options', function(){
+    assert.throws(function(){
+      antiSpam.ban()
+    },Error)
+	})
+	it('Call unban without options', function(){
+    assert.throws(function(){
+      antiSpam.unBan()
+    },Error)
+	})
+	it('Call addSpam without a socket variable', function(){
+    assert.throws(function(){
+      antiSpam.addSpam()
+    },Error)
+	})
+	it('Call ban with a non existing ip', function(){
+      assert.equal(antiSpam.ban({ip:"kappa"}),false)
+	})
+	it('Call unban with a non existing ip', function(){
+      assert.equal(antiSpam.unBan({ip:"kappa"}),false)
+	})
 })
