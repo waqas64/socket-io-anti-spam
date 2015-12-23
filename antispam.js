@@ -64,11 +64,13 @@ exports.addSpam = function(socket){
 }
 
 function clearHeart(socket){
+  if(not(socket)) throw new Error("socket variable is not defined");
   if(!heartbeats[socket.id]) return
   clearInterval(heartbeats[socket.id].interval)
 }
 
 function addHeart(socket){
+  if(not(socket)) throw new Error("socket variable is not defined");
   if(heartbeats[socket.id]) return
   clearHeart(socket)
   heartbeats[socket.id] = {
@@ -77,6 +79,7 @@ function addHeart(socket){
 }
 
 function checkHeart(socket){
+  if(not(socket)) throw new Error("socket variable is not defined");
   if(!heartbeats[socket.id]) return(clearHeart(socket))
   var startedSince = Math.round(heartbeats[socket.id].interval._idleStart/1000)
   if(startedSince>=options.heartBeatStale) clearHeart(socket)
@@ -89,6 +92,8 @@ function checkHeart(socket){
 }
 
 function authenticate(socket, cb){
+  if(not(cb)) throw new Error("No callback defined")
+  if(not(socket)) cb("Socket variable is not defined",null);
   exists(socket, function(err,data){
     if(err) return(cb(err,null))
     if(data.banned){
@@ -121,7 +126,8 @@ function exists(socket, cb){
 }
 
 exports.ban = function(data,min){
-  if(not(min)) min = options.banTime;
+  if(not(data)) throw new Error("No options defined")
+  if(not(min)) min = options.banTime
   var ip = false
   if(typeof(users[data])!="undefined") ip = data
   if(typeof(users[data.ip])!="undefined") ip = data.ip
@@ -130,6 +136,7 @@ exports.ban = function(data,min){
 }
 
 exports.unBan = function(data){
+  if(not(data)) throw new Error("No options defined")
   var ip = false
   if(typeof(users[data])!="undefined") ip = data
   if(typeof(users[data.ip])!="undefined") ip = data.ip

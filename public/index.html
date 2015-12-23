@@ -1,6 +1,6 @@
 <script src="http://127.0.0.1:8080/socket.io/socket.io.js"></script>
+<button onClick='repeat()'>spam</button>
 <div id="status"></div>
-<div id="spamscore"></div>
 <div id="doing"></div>
 <script>
 	var less = 1;
@@ -9,24 +9,19 @@
 	var spamscorediv = document.getElementById('spamscore');
 	var socket = io.connect('http://127.0.0.1:8080');
 	disconnected = false;
+  
 	
 	socket.on("connect", function(){
 		doingdiv.innerHTML = 'STATUS: Connected<br/>';
-		repeat();
+    disconnected = false;
 	});
 	socket.on("disconnect", function(){
-		doingdiv.innerHTML = 'STATUS: Disconnected/Kicked!<br/>';
+		doingdiv.innerHTML = 'STATUS: Disconnected<br/>';
 		disconnected = true;
-	});
-	socket.on("spamscore", function(score){
-		spamscorediv.innerHTML = 'Spamscore: '+score+'<br/>';
+    socket = io.connect('http://127.0.0.1:8080',  { 'forceNew': true });
 	});
 	function repeat(){
-		if(disconnected) return;
 		socket.emit('spamming', { some: 'data' });
 		doingdiv.innerHTML = doingdiv.innerHTML + 'Emitting...';
-		if(less>100) return;
-		less++;
-		setTimeout(function(){ repeat(); },4000/less);
 	}
 </script>
