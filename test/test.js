@@ -144,9 +144,6 @@ describe("Init function", function(){
 
 describe("Misc functions", function(){
 	this.timeout(10000)
-	it('Call lowerScore()', function(){
-    assert.equal(antiSpam.lowerScore(),true)
-	})
 	it('Call lowerKickCount()', function(){
     assert.equal(antiSpam.lowerKickCount(),true)
 	})

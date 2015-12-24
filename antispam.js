@@ -48,6 +48,16 @@ exports.addSpam = function(socket){
     if(err) throw new Error(err)
     if(data.banned) return
     
+    var lastInteraction = moment.duration(moment().diff(data.lastInteraction)).asSeconds()
+    data.lastInteraction = moment()
+    
+    if(lastInteraction<1) data.score++
+    if(lastInteraction>=1){
+      var newScore = data.score - Math.round(lastInteraction)
+      data.score = newScore
+      if(newScore<=0) data.score = 0
+    }
+    
     if(data.score>=options.kickThreshold){
       data.score = 0
       data.kickCount = data.kickCount + 1
@@ -59,7 +69,6 @@ exports.addSpam = function(socket){
       }
       socket.disconnect()
     }
-    data.score++
   })
 }
 
@@ -80,42 +89,31 @@ function checkHeart(socket){
   if(!heartbeats[socket.id]) return(clearHeart(socket))
   var startedSince = Math.round(heartbeats[socket.id].interval._idleStart/1000)
   if(startedSince>=options.heartBeatStale) clearHeart(socket)
-  if(users[socket.ip]){
-    if(users[socket.ip].banned){
-      socket.disconnect()
-      clearHeart(socket)
-    }
-  }
+  authenticate(socket)
 }
 
 function authenticate(socket, cb){
-  exists(socket, function(err,data){
-    if(err) return(cb(err,null))
-    if(data.banned){
-      data.banned = false
-      if(heartbeats[socket.id]) clearHeart(socket)
-      if(data.bannedUntil.diff(moment(), 'seconds')>=1){
-        data.banned = true
-        socket.disconnect()
-      }
-    }
-    addHeart(socket)
-    cb(null,data)
-  })
-}
-function exists(socket, cb){
   if(not(socket.ip)) socket.ip = socket.client.request.headers['x-forwarded-for'] || socket.client.conn.remoteAddress
-  if(typeof(users[socket.ip])!="undefined"){
-    cb(null,users[socket.ip])
-  }else{
+  if(typeof(users[socket.ip])=="undefined"){
     users[socket.ip] = {
       score: 0,
       banned: false,
       kickCount: 0,
-      bannedUntil: 0
+      bannedUntil: 0,
+      lastInteraction: moment()
     }
-    cb(null,users[socket.ip])
   }
+  var data = users[socket.ip]
+  if(data.banned){
+    data.banned = false
+    if(heartbeats[socket.id]) clearHeart(socket)
+    if(data.bannedUntil.diff(moment(), 'seconds')>=1){
+      data.banned = true
+      socket.disconnect()
+    }
+  }
+  addHeart(socket)
+  if(cb) cb(null,data)
 }
 
 exports.ban = function(data,min){
@@ -159,14 +157,6 @@ exports.getBans = function(){
   return banned
 }
 
-exports.lowerScore = function(){
-  var user
-  for(user in users){
-    if(users[user].score>=1) users[user].score = users[user].score - 1
-  }
-  return true
-}
-
 exports.lowerKickCount = function(){
   var user
   for(user in users){
@@ -175,7 +165,6 @@ exports.lowerKickCount = function(){
   return true
 }
 
-setInterval(exports.lowerScore,1000)
 setInterval(exports.lowerKickCount,1800000)
 
 exports.antiSpam = exports
