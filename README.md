@@ -16,7 +16,7 @@ ___
 # How it works
 All connected sockets will have a object binded to them full of information that socket-anti-spam keeps track of.   
 This includes how much 'spamScore' someone has. If a socket is doing a socket.emit his spamScore will increase.   
-The module will give all sockets connected a -1 spamScore every second.  
+The module will give all sockets connected a -1 spamScore every second (no intervals!).  
 if the spamScore is above a certain spamScore threshold the socket will be disconnected.   
 If the socket keeps spamming after a certain kick threshold, the socket will be temp ip banned.
 
