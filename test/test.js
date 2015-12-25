@@ -142,13 +142,6 @@ describe("Init function", function(){
 	})
 })
 
-describe("Misc functions", function(){
-	this.timeout(10000)
-	it('Call lowerKickCount()', function(){
-    assert.equal(antiSpam.lowerKickCount(),true)
-	})
-})
-
 describe("Error Handling", function(){
 	this.timeout(10000)
 	it('Call authentication without a socket', function(){

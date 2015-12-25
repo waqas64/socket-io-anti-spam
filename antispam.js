@@ -57,10 +57,17 @@ exports.addSpam = function(socket){
       data.score = newScore
       if(newScore<=0) data.score = 0
     }
+      
+    var lastLowerKick = moment.duration(moment().diff(data.lastLowerKick)).asSeconds()
+    if(lastLowerKick>=5 && data.kickCount>=1){
+      data.lastLowerKick = moment()
+      data.kickCount--
+    }
     
     if(data.score>=options.kickThreshold){
       data.score = 0
       data.kickCount = data.kickCount + 1
+        console.log("up the kick count!")
       if(data.kickCount>=options.kickTimesBeforeBan && options.banning){
         clearHeart(socket)
         data.kickCount = 0
@@ -100,7 +107,8 @@ function authenticate(socket, cb){
       banned: false,
       kickCount: 0,
       bannedUntil: 0,
-      lastInteraction: moment()
+      lastInteraction: moment(),
+      lastLowerKick: moment()
     }
   }
   var data = users[socket.ip]
@@ -156,15 +164,5 @@ exports.getBans = function(){
   }
   return banned
 }
-
-exports.lowerKickCount = function(){
-  var user
-  for(user in users){
-    if(users[user].kickCount>=1) users[user].kickCount = users[user].kickCount - 1
-  }
-  return true
-}
-
-setInterval(exports.lowerKickCount,1800000)
 
 exports.antiSpam = exports
