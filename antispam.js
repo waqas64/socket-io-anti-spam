@@ -71,6 +71,7 @@ exports.addSpam = function(socket){
         clearHeart(socket)
         data.kickCount = 0
         data.banned = true
+        data.lastLowerKick = moment()
         data.bannedUntil = moment().add(options.banTime, 'minutes')
       }
       socket.disconnect()
@@ -147,9 +148,11 @@ function ban(ban,data,min){
   users[data].score = 0
   if(ban){
     users[data].banned = true
+    users[data].lastLowerKick = moment()
     users[data].bannedUntil = moment().add(min, 'minutes')
   }else{
     users[data].banned = false
+    users[data].lastLowerKick = moment()
     users[data].bannedUntil = 0
   }
   return true
