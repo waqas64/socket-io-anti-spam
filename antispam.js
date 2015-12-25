@@ -43,7 +43,7 @@ exports.init = function(sets) {
 }
 
 exports.addSpam = function(socket){
-  if(not(socket)) throw new Error("socket variable is not defined")
+  if(not(socket)) throw new Error('socket variable is not defined')
   authenticate(socket, function(err,data){
     if(err) throw new Error(err)
     if(data.banned) return
@@ -101,7 +101,7 @@ function checkHeart(socket){
 
 function authenticate(socket, cb){
   if(not(socket.ip)) socket.ip = socket.client.request.headers['x-forwarded-for'] || socket.client.conn.remoteAddress
-  if(typeof(users[socket.ip])=="undefined"){
+  if(typeof(users[socket.ip])=='undefined'){
     users[socket.ip] = {
       score: 0,
       banned: false,
@@ -125,20 +125,20 @@ function authenticate(socket, cb){
 }
 
 exports.ban = function(data,min){
-  if(not(data)) throw new Error("No options defined")
+  if(not(data)) throw new Error('No options defined')
   if(not(min)) min = options.banTime
   var ip = false
-  if(typeof(users[data])!="undefined") ip = data
-  if(typeof(users[data.ip])!="undefined") ip = data.ip
+  if(typeof(users[data])!='undefined') ip = data
+  if(typeof(users[data.ip])!='undefined') ip = data.ip
   if(ip) return ban(true,ip)
   return false
 }
 
 exports.unBan = function(data){
-  if(not(data)) throw new Error("No options defined")
+  if(not(data)) throw new Error('No options defined')
   var ip = false
-  if(typeof(users[data])!="undefined") ip = data
-  if(typeof(users[data.ip])!="undefined") ip = data.ip
+  if(typeof(users[data])!='undefined') ip = data
+  if(typeof(users[data.ip])!='undefined') ip = data.ip
   if(ip) return ban(false,ip)
   return false
 }
