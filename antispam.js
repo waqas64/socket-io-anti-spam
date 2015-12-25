@@ -59,7 +59,7 @@ exports.addSpam = function(socket){
     }
       
     var lastLowerKick = moment.duration(moment().diff(data.lastLowerKick)).asSeconds()
-    if(lastLowerKick>=5 && data.kickCount>=1){
+    if(lastLowerKick>=1800 && data.kickCount>=1){
       data.lastLowerKick = moment()
       data.kickCount--
     }
@@ -67,7 +67,6 @@ exports.addSpam = function(socket){
     if(data.score>=options.kickThreshold){
       data.score = 0
       data.kickCount = data.kickCount + 1
-        console.log("up the kick count!")
       if(data.kickCount>=options.kickTimesBeforeBan && options.banning){
         clearHeart(socket)
         data.kickCount = 0
