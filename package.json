@@ -1,6 +1,6 @@
 {
   "name": "socket-anti-spam",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "description": "This module prevents socket.emit spams by clients via ip bans",
   "main": "antispam.js",
   "scripts": {
