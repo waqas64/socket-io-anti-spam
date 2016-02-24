@@ -23,7 +23,7 @@ antiSpam.init({
 });
 
 var ip = "::ffff:127.0.0.1";
-if(process.version=="v0.10.41") ip = "127.0.0.1";
+if(process.version=="v0.10.42") ip = "127.0.0.1";
 
 function repeat(){
 	if(disconnected){
