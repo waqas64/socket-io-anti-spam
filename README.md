@@ -46,7 +46,7 @@ var socket-io = require('socket.io').listen(8080);
 antiSpam.init({
     banTime: 30,            // Ban time in minutes
     kickThreshold: 2,       // User gets kicked after this many spam score
-    kickTimesBeforeBan: 1   // User gets banned after this many kicks
+    kickTimesBeforeBan: 1,  // User gets banned after this many kicks
     banning: true,          // Uses temp IP banning after kickTimesBeforeBan
     heartBeatStale: 40,     // Removes a heartbeat after this many seconds
     heartBeatCheck: 4,      // Checks a heartbeat per this many seconds
