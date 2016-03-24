@@ -1,7 +1,10 @@
 'use strict'
 
 var moment = require('moment')
-var not = require('./nott.js')
+
+var not = function(val){
+    return (val==null || val===false || val==undefined)
+}
 
 var defaultOptions = {
   banTime: 60,
