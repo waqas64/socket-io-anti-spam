@@ -41,10 +41,7 @@ exports.init = function(sets) {
         emit.apply(socket, arguments)
       }
 
-      authenticate(socket, function(err, data) {
-        if (err)
-          throw new Error(err)
-      })
+      authenticate(socket)
 
       socket.on('disconnect', function() {
         clearHeart(socket)
@@ -58,9 +55,7 @@ exports.init = function(sets) {
 exports.addSpam = function(socket) {
   if (not(socket))
     throw new Error('socket variable is not defined')
-  authenticate(socket, function(err, data) {
-    if (err)
-      throw new Error(err)
+  authenticate(socket, function(data) {
     if (data.banned)
       return
 
@@ -154,7 +149,7 @@ function authenticate(socket, cb) {
 
   addHeart(socket)
   if (cb)
-    cb(null, data)
+    cb(data)
 }
 
 exports.ban = function(data, min) {

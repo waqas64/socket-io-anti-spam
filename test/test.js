@@ -93,10 +93,11 @@ clientSocket.on('disconnect', function() {
   disconnected = true
 })
 
-
+var canSpam = false
 io.sockets.on('connection', function(socket) {
   socket.on('spamming', function() {
-    socket.emit('spamscore', null)
+    if (canSpam)
+      socket.emit('spamscore', null)
   })
 })
 
@@ -104,7 +105,15 @@ io.sockets.on('connection', function(socket) {
 
 describe('Ban system', function() {
   this.timeout(10000)
+  it('Wait 2000ms for lastInteract', function(done) {
+    setTimeout(function(done) {
+      console.log(antiSpam.getBans())
+      done()
+    }, 2000, done)
+  })
+
   it('Connect to the webserver, spam socket.emits and get disconnect/kicked', function(done) {
+    canSpam = true
     var spammerino = setInterval(function() {
       repeat()
       if (!disconnected)
