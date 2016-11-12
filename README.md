@@ -36,7 +36,7 @@ ___
 #  Getting started
 
 ##### 1. Start by installing the package:
-    npm install socket-anti-spam
+    yarn add socket-anti-spam
 
 ##### 2. Load the code
 

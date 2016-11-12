@@ -37,14 +37,19 @@ exports.init = function(sets) {
     sets.io.on('connection', function(socket) {
       var emit = socket.emit
       socket.emit = function() {
-        exports.addSpam(socket)
-        emit.apply(socket, arguments)
+        if (!socket.banned) {
+          exports.addSpam(socket)
+          emit.apply(socket, arguments)
+        }
       }
-
       authenticate(socket)
 
       socket.on('disconnect', function() {
         clearHeart(socket)
+      })
+
+      socket.on('error', function(err) {
+        console.error(err)
       })
     })
   }
@@ -143,6 +148,7 @@ function authenticate(socket, cb) {
       clearHeart(socket)
     if (data.bannedUntil.diff(moment(), 'seconds') >= 1) {
       data.banned = true
+      socket.banned = true
       socket.disconnect()
     }
   }
