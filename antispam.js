@@ -1,39 +1,38 @@
 const moment = require('moment')
 const events = require('events')
-const debug = require('debug')('socketantispam')
-const debugHeartbeats = require('debug')('socketantispam:heartbeats')
 
 class SocketAntiSpam {
   constructor(sets) {
-    debug('Initializing')
+    this.debug('constructor', 'Initializing')
     this.defaultOptions = {
       banTime: 60,
       kickThreshold: 10,
       kickTimesBeforeBan: 3,
       banning: true,
-      heartBeatStale: 40,
-      heartBeatCheck: 4,
     }
 
     this.users = {}
-    this.heartbeats = {}
     this.options = this.defaultOptions
     this.event = new events.EventEmitter()
 
-    if (this.not(sets.banTime))
+    if (this.not(sets.banTime)) {
       sets.banTime = this.defaultOptions.banTime
-    if (this.not(sets.kickThreshold))
+    }
+
+    if (this.not(sets.kickThreshold)) {
       sets.kickThreshold = this.defaultOptions.kickThreshold
-    if (this.not(sets.kickTimesBeforeBan))
+    }
+
+    if (this.not(sets.kickTimesBeforeBan)) {
       sets.kickTimesBeforeBan = this.defaultOptions.kickTimesBeforeBan
-    if (this.not(sets.banning))
+    }
+
+    if (this.not(sets.banning)) {
       sets.banning = this.defaultOptions.banning
-    if (this.not(sets.heartBeatStale))
-      sets.heartBeatStale = this.defaultOptions.heartBeatStale
-    if (this.not(sets.heartBeatCheck))
-      sets.heartBeatCheck = this.defaultOptions.heartBeatCheck
+    }
+
     if (sets.io) {
-      debug('Socket-io variable given, binding to onevent\'s')
+      this.debug('constructor', 'Socket-io variable given, binding to onevent\'s')
       sets.io.on('connection', (socket) => {
         const _onevent = socket.onevent
         socket.onevent = packet => {
@@ -41,108 +40,67 @@ class SocketAntiSpam {
           this.addSpam(socket).then(() => {
             _onevent.call(socket, packet)
           }).catch(e => {
-            throw new Error(e)
+            this.event.emit('error', new Error(e))
           })
         }
 
         this.authenticate(socket)
-
-        socket.on('disconnect', () => {
-          this.clearHeart(socket)
-        })
       })
     }
 
     this.options = sets
   }
 
+  debug(place, text) {
+    let printText = ''
+    for (var i = 1; i < arguments.length; i++) {
+      printText += arguments[i] + ' '
+    }
+
+    require('debug')(`socketantispam:${place}`)(`${printText}`)
+  }
+
   not(val) {
     return (val == null || val === false || val == undefined)
   }
 
-  clearHeart(socket) {
-    if (!this.heartbeats[socket.id]) {
-      return
-    }
-
-    debugHeartbeats('Clearing heartbeat', socket.id)
-    clearInterval(this.heartbeats[socket.id].interval)
-    delete this.heartbeats[socket.id]
-  }
-
-  addHeart(socket) {
-    if (this.heartbeats[socket.id]) {
-      return
-    }
-
-    debugHeartbeats('Adding heartbeat', socket.id)
-    this.clearHeart(socket)
-    this.heartbeats[socket.id] = {
-      interval: setInterval(socket => {
-        this.checkHeart(socket)
-      }, this.options.heartBeatCheck * 1000, socket),
-    }
-  }
-
-  checkHeart(socket) {
-    if (!this.heartbeats[socket.id]) {
-      return (this.clearHeart(socket))
-    }
-
-    debugHeartbeats('Checking heartbeat', socket.id)
-    const startedSince = Math.round(this.heartbeats[socket.id].interval._idleStart / 1000)
-    if (startedSince >= this.options.heartBeatStale) {
-      this.clearHeart(socket)
-    }
-
-    this.authenticate(socket)
-  }
-
   authenticate(socket) {
-    debug('Authenticating socket', socket.id)
+    this.debug('authenticate', 'Authenticating socket', socket.id)
     return new Promise((resolve, reject) => {
-      try {
-        if (this.not(socket.ip)) {
-          socket.ip = socket.client.request.headers['x-forwarded-for'] || socket.client.conn.remoteAddress
-        }
-
-        this.event.emit('authenticate', socket)
-        if (typeof(this.users[socket.ip]) == 'undefined') {
-          this.users[socket.ip] = {
-            score:           0,
-            banned:          false,
-            kickCount:       0,
-            bannedUntil:     0,
-            lastInteraction: moment(),
-            lastLowerKick:   moment(),
-          }
-        }
-
-        const data = this.users[socket.ip]
-        if (data.banned) {
-          data.banned = false
-          if (this.heartbeats[socket.id]) {
-            this.clearHeart(socket)
-          }
-
-          if (data.bannedUntil.diff(moment(), 'seconds') >= 1) {
-            data.banned = true
-            socket.banned = true
-            debug('Banned socket on authentication', socket.id, 'for', data.bannedUntil.diff(moment(), 'seconds'), 'seconds')
-            socket.disconnect()
-          }
-        }
-
-        this.addHeart(socket)
-        return resolve(data)
-      } catch (e) {
-        return reject(e)
+      if (this.not(socket.ip)) {
+        socket.ip = socket.client.request.headers['x-forwarded-for'] || socket.client.conn.remoteAddress
       }
+
+      this.event.emit('authenticate', socket)
+      if (typeof(this.users[socket.ip]) == 'undefined') {
+        this.users[socket.ip] = {
+          score:           0,
+          banned:          false,
+          kickCount:       0,
+          bannedUntil:     0,
+          lastInteraction: moment(),
+          lastLowerKick:   moment(),
+        }
+      }
+
+      const data = this.users[socket.ip]
+      if (data.banned) {
+        data.banned = false
+
+        if (data.bannedUntil.diff(moment(), 'seconds') >= 1) {
+          data.banned = true
+          socket.banned = true
+          this.debug('authenticate', 'Banned socket on authentication', socket.id, 'for', data.bannedUntil.diff(moment(), 'seconds'), 'seconds')
+          socket.disconnect()
+        }
+      }
+
+      return resolve(data)
     })
   }
 
   addSpam(socket) {
-    debug('Adding spamscore to', socket.id)
+    this.debug('addspam', 'Adding spamscore to', socket.id)
     return new Promise((resolve, reject) => {
       if (this.not(socket)) {
         return reject(new Error('socket variable is not defined'))
@@ -181,7 +139,6 @@ class SocketAntiSpam {
           data.kickCount = data.kickCount + 1
           if (data.kickCount >= this.options.kickTimesBeforeBan && this.options.banning) {
             this.event.emit('ban', socket, data)
-            this.clearHeart(socket)
             data.kickCount = 0
             data.banned = true
             data.lastLowerKick = moment()
@@ -191,7 +148,7 @@ class SocketAntiSpam {
           socket.disconnect()
         }
 
-        debug('Current spamscore of', socket.id, 'is', data.score)
+        this.debug('addspam', 'Current spamscore of', socket.id, 'is', data.score)
         return resolve(data)
       }).catch(e => {
         return reject(e)
@@ -200,81 +157,90 @@ class SocketAntiSpam {
   }
 
   ban(data, min) {
-    debug('Banning', data, min)
-    if (this.not(data)) {
-      throw new Error('No options defined')
-    }
+    this.debug('ban', 'Banning', data, min)
+    return new Promise((resolve, reject) => {
+      if (this.not(data)) {
+        throw new Error('No options defined')
+      }
 
-    if (this.not(min)) {
-      min = this.options.banTime
-    }
+      if (this.not(min)) {
+        min = this.options.banTime
+      }
 
-    let ip = false
-    if (typeof(this.users[data]) !='undefined') {
-      ip = data
-    }
+      let ip = false
+      if (typeof(this.users[data]) !='undefined') {
+        ip = data
+      }
 
-    if (typeof(this.users[data.ip]) != 'undefined') {
-      ip = data.ip
-    }
+      if (typeof(this.users[data.ip]) != 'undefined') {
+        ip = data.ip
+      }
 
-    if (ip) {
-      return this.banUser(true, ip)
-    }
+      if (ip) {
+        return this.banUser(true, ip).then(resolve).catch(reject)
+      }
 
-    return false
+      return reject(new Error('ip is not defined'))
+    })
   }
 
   unBan(data) {
-    debug('Unbanning', data)
-    if (this.not(data)) {
-      throw new Error('No options defined')
-    }
+    this.debug('unban', 'Unbanning', data)
+    return new Promise((resolve, reject) => {
+      if (this.not(data)) {
+        return reject(new Error('No options defined'))
+      }
 
-    let ip = false
-    if (typeof(this.users[data]) != 'undefined') {
-      ip = data
-    }
+      let ip = false
+      if (typeof(this.users[data]) != 'undefined') {
+        ip = data
+      }
 
-    if (typeof(this.users[data.ip]) != 'undefined') {
-      ip = data.ip
-    }
+      if (typeof(this.users[data.ip]) != 'undefined') {
+        ip = data.ip
+      }
 
-    if (ip) {
-      return this.banUser(false, ip)
-    }
+      if (ip) {
+        return this.banUser(false, ip).then(resolve).catch(reject)
+      }
 
-    return false
+      return reject(new Error('ip is not defined'))
+    })
   }
 
   banUser(ban, data, min) {
-    debug('banUser', ban, data, min)
-    this.users[data].kickCount = 0
-    this.users[data].score = 0
-    if (ban) {
-      this.users[data].banned = true
-      this.users[data].lastLowerKick = moment()
-      this.users[data].bannedUntil = moment().add(min, 'minutes')
-    } else {
-      this.users[data].banned = false
-      this.users[data].lastLowerKick = moment()
-      this.users[data].bannedUntil = 0
-    }
+    this.debug('banUser', ban, data, min)
 
-    return true
+    return new Promise((resolve, reject) => {
+      this.users[data].kickCount = 0
+      this.users[data].score = 0
+      if (ban) {
+        this.users[data].banned = true
+        this.users[data].lastLowerKick = moment()
+        this.users[data].bannedUntil = moment().add(min, 'minutes')
+      } else {
+        this.users[data].banned = false
+        this.users[data].lastLowerKick = moment()
+        this.users[data].bannedUntil = 0
+      }
+
+      return resolve()
+    })
   }
 
   getBans() {
-    const banned = []
-    for (let user in this.users) {
-      if (this.users[user].banned)
-        banned.push({
-          ip:    user,
-          until: this.users[user].bannedUntil,
-        })
-    }
+    return new Promise((resolve, reject) => {
+      const banned = []
+      for (let user in this.users) {
+        if (this.users[user].banned)
+          banned.push({
+            ip:    user,
+            until: this.users[user].bannedUntil,
+          })
+      }
 
-    return banned
+      return resolve(banned)
+    })
   }
 }
 
