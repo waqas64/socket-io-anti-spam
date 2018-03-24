@@ -4,7 +4,6 @@
     "disallowNewlineBeforeBlockStatements": true,
     "requireCurlyBraces": false,
     "requireSpaceAfterComma": true,
-    "requireUseStrict": true,
     "disallowMultipleVarDecl": true,
     "maximumLineLength": 130,
     "requireCapitalizedConstructors": false,
