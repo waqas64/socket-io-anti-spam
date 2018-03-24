@@ -83,6 +83,7 @@ class SocketAntiSpam {
     if (!this.redis) {
       return false
     }
+
     this.debug('redis', 'Commiting Data')
 
     return new Promise((resolve, reject) => {
@@ -95,6 +96,7 @@ class SocketAntiSpam {
     if (!this.redis) {
       return false
     }
+
     this.debug('redis', 'Reading Data')
 
     return new Promise((resolve, reject) => {
@@ -148,11 +150,11 @@ class SocketAntiSpam {
   }
 
   addSpam(socket) {
-    this.debug('addspam', 'Adding spamscore to', socket.id)
     return new Promise((resolve, reject) => {
       if (this.not(socket)) {
         return reject(new Error('socket variable is not defined'))
       }
+      this.debug('addspam', 'Adding spamscore to', socket.id)
 
       this.authenticate(socket).then(data => {
         if (data.banned) {

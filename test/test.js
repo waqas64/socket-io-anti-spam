@@ -19,11 +19,8 @@ const socketAntiSpam = new SocketAntiSpam({
   kickThreshold:      1,      // User gets kicked after this many spam score
   kickTimesBeforeBan: 1,      // User gets banned after this many kicks
   banning:            true,   // Uses temp IP banning after kickTimesBeforeBan
-  heartBeatStale:     40,     // Removes a heartbeat after this many seconds
-  heartBeatCheck:     0.1,    // Checks a heartbeat per this many seconds
   io:                 io,     // Bind the socketio variable
 })
-
 
 var authenticateEventWorks = false
 socketAntiSpam.event.on('authenticate', function() {
@@ -133,33 +130,36 @@ describe('Ban system', function() {
     }, 1)
   })
 
-  it('Confirm ban', function() {
-    assert.equal(socketAntiSpam.getBans()[0].ip, ip)
+  it('Confirm ban', function(done) {
+    socketAntiSpam.getBans().then(bans => {
+      assert.equal(bans[0].ip, ip)
+      done()
+    })
   })
 
-  it('unBan ip', function() {
+  it('unBan ip', function(done) {
     socketAntiSpam.unBan(ip)
-    assert.equal(socketAntiSpam.getBans().length, 0)
+    socketAntiSpam.getBans().then(bans => {
+      assert.equal(bans.length, 0)
+      done()
+    })
   })
 
-  it('ban ip', function() {
+  it('ban ip', function(done) {
     socketAntiSpam.ban(ip)
-    assert.equal(socketAntiSpam.getBans()[0].ip, ip)
+    socketAntiSpam.getBans().then(bans => {
+      assert.equal(bans[0].ip, ip)
+      done()
+    })
   })
 
-  it('ban ip for 1 ms', function() {
+  it('ban ip for 1 ms', function(done) {
     socketAntiSpam.unBan(ip)
     socketAntiSpam.ban(ip, 0.000000001)
-    assert.equal(socketAntiSpam.getBans()[0].ip, ip)
-  })
-})
-
-describe('Heartbeat', function() {
-  this.timeout(3000)
-  it('Wait 100ms for heartbeat', function(done) {
-    setTimeout(function(done) {
+    socketAntiSpam.getBans().then(bans => {
+      assert.equal(bans[0].ip, ip)
       done()
-    }, 100, done)
+    })
   })
 })
 
@@ -171,8 +171,6 @@ describe('Init function', function() {
       kickThreshold: 2,       // User gets kicked after this many spam score
       kickTimesBeforeBan: 1,  // User gets banned after this many kicks
       banning: true,          // Uses temp IP banning after kickTimesBeforeBan
-      heartBeatStale: 40,     // Removes a heartbeat after this many seconds
-      heartBeatCheck: 4,      // Checks a heartbeat per this many seconds
       io: io,                  // Bind the socketio variable
     })
   })
@@ -215,41 +213,59 @@ describe('Events', function() {
 })
 
 describe('Error Handling', function() {
-  this.timeout(3000)
+  this.timeout(1000)
   it('Call authentication without a socket', function(done) {
       socketAntiSpam.authenticate('test').catch(e => {
         done()
       })
   })
 
-  it('Call ban without options', function() {
-    assert.throws(function() {
-      socketAntiSpam.ban()
-    }, Error)
+  it('Call ban without options', function(done) {
+    socketAntiSpam.ban().catch(e => {
+      assert.throws(function() {
+        throw new Error(e)
+      }, Error)
+      done()
+    })
   })
 
-  it('Call unban without options', function() {
-    assert.throws(function() {
-      socketAntiSpam.unBan()
-    }, Error)
+  it('Call unban without options', function(done) {
+    socketAntiSpam.unBan().catch(e => {
+      assert.throws(function() {
+        throw new Error(e)
+      }, Error)
+      done()
+    })
   })
 
-  it('Call addSpam without a socket variable', function() {
-    assert.throws(function() {
-      socketAntiSpam.addSpam()
-    }, Error)
+  it('Call addSpam without a socket variable', function(done) {
+    socketAntiSpam.addSpam().catch(e => {
+      assert.throws(function() {
+        throw new Error(e)
+      }, Error)
+      done()
+    })
   })
 
-  it('Call ban with a non existing ip', function() {
-    assert.equal(socketAntiSpam.ban({
+  it('Call ban with a non existing ip', function(done) {
+    socketAntiSpam.ban({
       ip: 'kappa',
-    }), false)
+    }).catch(e => {
+      assert.throws(function() {
+        throw new Error(e)
+      }, Error)
+      done()
+    })
   })
 
-  it('Call unban with a non existing ip', function() {
-    assert.equal(socketAntiSpam.unBan({
+  it('Call unban with a non existing ip', function(done) {
+    socketAntiSpam.unBan({
       ip: 'kappa',
-    }), false)
+    }).catch(e => {
+      assert.throws(function() {
+        throw new Error(e)
+      }, Error)
+      done()
+    })
   })
-
 })
