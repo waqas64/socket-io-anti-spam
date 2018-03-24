@@ -31,6 +31,11 @@ class SocketAntiSpam {
       sets.banning = this.defaultOptions.banning
     }
 
+    if (this.not(sets.redis)) {
+      sets.redis = false
+      this.debug('constructor', 'Not using redis..')
+    }
+
     if (sets.io) {
       this.debug('constructor', 'Socket-io variable given, binding to onevent\'s')
       sets.io.on('connection', (socket) => {
@@ -49,6 +54,16 @@ class SocketAntiSpam {
     }
 
     this.options = sets
+    this.redis = this.options.redis
+
+    if (this.redis) {
+      this.debug('constructor', 'Using redis store..')
+      setInterval(() => {
+        this.redisCommit()
+      }, 4000)
+    }
+
+    this.redisRead()
   }
 
   debug(place, text) {
@@ -62,6 +77,36 @@ class SocketAntiSpam {
 
   not(val) {
     return (val == null || val === false || val == undefined)
+  }
+
+  redisCommit() {
+    if (!this.redis) {
+      return false
+    }
+    this.debug('redis', 'Commiting Data')
+
+    return new Promise((resolve, reject) => {
+      this.redis.set('socketantispam_users', JSON.stringify(this.users))
+      resolve()
+    })
+  }
+
+  redisRead() {
+    if (!this.redis) {
+      return false
+    }
+    this.debug('redis', 'Reading Data')
+
+    return new Promise((resolve, reject) => {
+      this.redis.get('socketantispam_users', (err, reply) => {
+        if (err) {
+          return reject(err)
+        }
+
+        this.users = JSON.parse(reply)
+        return resolve()
+      })
+    })
   }
 
   authenticate(socket) {
@@ -87,6 +132,9 @@ class SocketAntiSpam {
       if (data.banned) {
         data.banned = false
 
+        if (data.bannedUntil.diff === undefined) {
+          data.bannedUntil = moment(data.bannedUntil)
+        }
         if (data.bannedUntil.diff(moment(), 'seconds') >= 1) {
           data.banned = true
           socket.banned = true

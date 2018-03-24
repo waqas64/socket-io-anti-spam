@@ -42,14 +42,17 @@ ___
   const SocketAntiSpam  = require('socket-anti-spam')
   const socket-io = require('socket.io').listen(8080)
 
+  // Redis is not needed, but can be used
+  const redis = require('redis')
+  const client = redis.createClient()
+
   const socketAntiSpam = new SocketAntiSpam({
     banTime:            30,         // Ban time in minutes
     kickThreshold:      2,          // User gets kicked after this many spam score
     kickTimesBeforeBan: 1,          // User gets banned after this many kicks
     banning:            true,       // Uses temp IP banning after kickTimesBeforeBan
-    heartBeatStale:     40,         // Removes a heartbeat after this many seconds
-    heartBeatCheck:     4,          // Checks a heartbeat per this many seconds
     io:                 socket-io,  // Bind the socket.io variable
+    redis:              client,      // Redis client if you are sharing multiple servers
   })
 
   // Call functions with created reference 'socketAntiSpam'
