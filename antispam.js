@@ -102,8 +102,9 @@ class SocketAntiSpam {
     debug('Authenticating socket', socket.id)
     return new Promise((resolve, reject) => {
       try {
-        if (this.not(socket.ip))
+        if (this.not(socket.ip)) {
           socket.ip = socket.client.request.headers['x-forwarded-for'] || socket.client.conn.remoteAddress
+        }
 
         this.event.emit('authenticate', socket)
         if (typeof(this.users[socket.ip]) == 'undefined') {
@@ -149,7 +150,7 @@ class SocketAntiSpam {
 
       this.authenticate(socket).then(data => {
         if (data.banned) {
-          return resolve()
+          return reject(new Error('socket is banned'))
         }
 
         const lastInteraction = moment.duration(moment().diff(data.lastInteraction)).asSeconds()
@@ -191,7 +192,7 @@ class SocketAntiSpam {
         }
 
         debug('Current spamscore of', socket.id, 'is', data.score)
-        return resolve()
+        return resolve(data)
       }).catch(e => {
         return reject(e)
       })
@@ -200,30 +201,49 @@ class SocketAntiSpam {
 
   ban(data, min) {
     debug('Banning', data, min)
-    if (this.not(data))
+    if (this.not(data)) {
       throw new Error('No options defined')
-    if (this.not(min))
+    }
+
+    if (this.not(min)) {
       min = this.options.banTime
+    }
+
     let ip = false
-    if (typeof(this.users[data]) !='undefined')
+    if (typeof(this.users[data]) !='undefined') {
       ip = data
-    if (typeof(this.users[data.ip]) != 'undefined')
+    }
+
+    if (typeof(this.users[data.ip]) != 'undefined') {
       ip = data.ip
-    if (ip)
+    }
+
+    if (ip) {
       return this.banUser(true, ip)
+    }
+
     return false
   }
 
   unBan(data) {
     debug('Unbanning', data)
-    if (this.not(data))
+    if (this.not(data)) {
       throw new Error('No options defined')
+    }
+
     let ip = false
-    if (typeof(this.users[data])!='undefined')
+    if (typeof(this.users[data]) != 'undefined') {
       ip = data
-    if (typeof(this.users[data.ip])!='undefined')
+    }
+
+    if (typeof(this.users[data.ip]) != 'undefined') {
       ip = data.ip
-    if (ip) return this.banUser(false, ip)
+    }
+
+    if (ip) {
+      return this.banUser(false, ip)
+    }
+
     return false
   }
 

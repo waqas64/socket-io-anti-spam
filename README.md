@@ -1,4 +1,5 @@
 [![](https://nodei.co/npm/socket-anti-spam.png?downloads=true&downloadRank=true&stars=true)](https://www.npmjs.com/package/socket-anti-spam)
+
 [![](https://david-dm.org/michaeldegroot/socket-anti-spam.svg 'deps') ](https://david-dm.org/michaeldegroot/socket-anti-spam 'david-dm')
 [![](https://travis-ci.org/michaeldegroot/socket-anti-spam.svg?branch=master 'testing') ](https://travis-ci.org/michaeldegroot/socket-anti-spam 'travis-ci')
 [![](https://coveralls.io/repos/michaeldegroot/socket-anti-spam/badge.svg?branch=master&service=github)](https://coveralls.io/github/michaeldegroot/socket-anti-spam?branch=master)
@@ -7,6 +8,7 @@
 ![](https://img.shields.io/npm/l/express.svg)
 ___
 # What it does
+
 
 Keeps track of how many socket.emit's an ip has submitted under a certain timeframe and determine if it is spammy behaviour.
 If the module determined the user is spamming the socket will receive a temp ip ban. Everything is customizable.
@@ -21,7 +23,6 @@ if the spamScore is above a certain spamScore threshold the socket will be disco
 If the socket keeps spamming after a certain kick threshold, the socket will be temp ip banned.
 
 
-
 [You can see a demo of the module in action here, please remember that this is from previous versions and the appearances might look different](https://bitbucket.org/repo/kR4677/images/1013607973-socketspam.gif)
 ___
 # Changelog
@@ -31,23 +32,29 @@ ___
 ___
 #  Getting started
 
+
 ##### 1. Start by installing the package:
-    yarn add socket-anti-spam
+  npm install socket-anti-spam
 
 ##### 2. Load the code
 
 ```javascript
-  const antiSpam  = require('socket-anti-spam')
+  const SocketAntiSpam  = require('socket-anti-spam')
   const socket-io = require('socket.io').listen(8080)
 
-  antiSpam.init({
-      banTime:            30,         // Ban time in minutes
-      kickThreshold:      2,          // User gets kicked after this many spam score
-      kickTimesBeforeBan: 1,          // User gets banned after this many kicks
-      banning:            true,       // Uses temp IP banning after kickTimesBeforeBan
-      heartBeatStale:     40,         // Removes a heartbeat after this many seconds
-      heartBeatCheck:     4,          // Checks a heartbeat per this many seconds
-      io:                 socket-io,  // Bind the socket.io variable
+  const socketAntiSpam = new SocketAntiSpam({
+    banTime:            30,         // Ban time in minutes
+    kickThreshold:      2,          // User gets kicked after this many spam score
+    kickTimesBeforeBan: 1,          // User gets banned after this many kicks
+    banning:            true,       // Uses temp IP banning after kickTimesBeforeBan
+    heartBeatStale:     40,         // Removes a heartbeat after this many seconds
+    heartBeatCheck:     4,          // Checks a heartbeat per this many seconds
+    io:                 socket-io,  // Bind the socket.io variable
+  })
+
+  // Call functions with created reference 'socketAntiSpam'
+  socketAntiSpam.event.on('ban', data => {
+    // Do stuff
   })
 ````
 
@@ -64,9 +71,7 @@ _Event fires when a socket authenticates with the socket-anti-spam module_
 __Example__
 
 ````js
-const antiSpam = require('socket-anti-spam')
-
-antiSpam.event.on('authenticate', socket => {
+socketAntiSpam.event.on('authenticate', socket => {
   // We have the socket var that tried to authenticate
 
 
@@ -82,9 +87,7 @@ _Event fires when a socket was kicked_
 __Example__
 
 ````js
-const antiSpam = require('socket-anti-spam')
-
-antiSpam.event.on('kick', (socket, data) => {
+socketAntiSpam.event.on('kick', (socket, data) => {
   // We have the socket var that was kicked
 
   // The second parameter is a object that was binded to the socket with some extra information
@@ -99,9 +102,7 @@ _Event fires when a socket was banned_
 __Example__
 
 ````js
-const antiSpam = require('socket-anti-spam')
-
-antiSpam.event.on('ban', (socket, data) => {
+socketAntiSpam.event.on('ban', (socket, data) => {
   // We have the socket var that was banned
 
   // The second parameter is a object that was binded to the socket with some extra information
@@ -116,9 +117,7 @@ _Event fires when a socket received a new spamscore_
 __Example__
 
 ````js
-const antiSpam = require('socket-anti-spam')
-
-antiSpam.event.on('spamscore', (socket, data) => {
+socketAntiSpam.event.on('spamscore', (socket, data) => {
   // We have the socket var that received a new spamscore update
 
   // The second parameter is a object that was binded to the socket with some extra information
@@ -142,12 +141,9 @@ __Example__
 
 ````js
 const io = require('socket.io')
-const antiSpam = require('socket-anti-spam')
-
 io.sockets.on('connection', socket => {
     socket.on('chatMessage', () => {
-        antiSpam.addSpam(socket) // Adds a spamscore because this socket sent a emit
-
+        socketAntiSpam.addSpam(socket) // Adds a spamscore because this socket sent a emit
         // The rest of your code
     })
 })
@@ -159,9 +155,7 @@ _Returns a array full of ip's that are currently banned_
 __Example__
 
 ````js
-const antiSpam = require('socket-anti-spam')
-
-const bans = antiSpam.getBans()
+const bans = socketAntiSpam.getBans()
 console.log(bans)   // Returns a array full of ip's that are currently banned
 ````
 ###  .ban(data,minutes)
@@ -174,18 +168,14 @@ _Simply bans a socket or ip_
 __Example__ banning a ip in string format
 
 ````js
-const antiSpam = require('socket-anti-spam')
-
-antiSpam.ban('127.0.0.1') // Bye!
+socketAntiSpam.ban('127.0.0.1') // Bye!
 ````
 
 __Example__ banning a socket, and set ban time for 5 minutes
 
 ````js
-const antiSpam = require('socket-anti-spam')
-
 io.sockets.on('connection', socket => {
-    antiSpam.ban(socket, 5)
+    socketAntiSpam.ban(socket, 5)
 })
 ````
 ###  .unBan(data)
@@ -197,18 +187,14 @@ _Simply unbans a socket or ip_
 __Example__ unbanning a ip in string format
 
 ````js
-const antiSpam = require('socket-anti-spam')
-
-antiSpam.unban('127.0.0.1') // He's back!
+socketAntiSpam.unban('127.0.0.1') // He's back!
 ````
 
 __Example__ unbanning a socket
 
 ````js
-const antiSpam = require('socket-anti-spam')
-
 io.sockets.on('connection', socket => {
-    antiSpam.unBan(socket)
+    socketAntiSpam.unBan(socket)
 })
 ````
 
