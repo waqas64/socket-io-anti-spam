@@ -1,5 +1,5 @@
 {
-  "name": "@betx/socket-anti-spam",
+  "name": "socket-io-anti-spam",
   "version": "2.2.0",
   "description": "This module prevents socket.emit spams by clients via ip bans",
   "main": "antispam.js",
@@ -10,7 +10,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/mrwillis/socket-anti-spam"
+    "url": "https://github.com/mrwillis/socket-io-anti-spam"
   },
   "keywords": [
     "socket.io",
