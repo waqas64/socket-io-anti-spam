@@ -9,6 +9,7 @@ class SocketAntiSpam {
       kickThreshold: 10,
       kickTimesBeforeBan: 3,
       banning: true,
+      socketIoPrefix: ""
     }
 
     this.users = {}
@@ -87,7 +88,7 @@ class SocketAntiSpam {
     this.debug('redis', 'Commiting Data')
 
     return new Promise((resolve, reject) => {
-      this.redis.set('socketantispam_users', JSON.stringify(this.users))
+      this.redis.set(`${this.options.socketIoPrefix}-socketantispam_users`, JSON.stringify(this.users))
       resolve()
     })
   }
@@ -100,7 +101,7 @@ class SocketAntiSpam {
     this.debug('redis', 'Reading Data')
 
     return new Promise((resolve, reject) => {
-      this.redis.get('socketantispam_users', (err, reply) => {
+      this.redis.get(`${this.options.socketIoPrefix}-socketantispam_users`, (err, reply) => {
         if (err) {
           return reject(err)
         }
@@ -115,7 +116,7 @@ class SocketAntiSpam {
     this.debug('authenticate', 'Authenticating socket', socket.id)
     return new Promise((resolve, reject) => {
       if (this.not(socket.ip)) {
-        socket.ip = socket.client.request.headers['x-forwarded-for'] || socket.client.conn.remoteAddress
+        socket.ip = socket.handshake.headers["x-forwarded-for"].split(",")[0];
       }
 
       this.event.emit('authenticate', socket)
