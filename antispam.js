@@ -52,7 +52,7 @@ class SocketAntiSpam {
           const args = packet.data || [];
           this.addSpam(socket)
             .then(() => {
-              _onevent.call(socket, packet);
+              this.nativeSocketOnEvent.call(socket, packet);
             })
             .catch(e => {
               this.event.emit("error", new Error(e));
