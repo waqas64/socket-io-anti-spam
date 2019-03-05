@@ -5,3 +5,4 @@ npm-debug.log
 .coveralls.yml
 coverage
 localtest.js
+yarn-error.log

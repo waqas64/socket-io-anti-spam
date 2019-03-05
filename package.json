@@ -1,16 +1,16 @@
 {
-  "name": "socket-anti-spam",
-  "version": "2.0.0",
+  "name": "@betx/socket-anti-spam",
+  "version": "2.1.0",
   "description": "This module prevents socket.emit spams by clients via ip bans",
   "main": "antispam.js",
   "scripts": {
-    "test": "mocha",
+    "test": "mocha --exit",
     "cover": "istanbul cover ./node_modules/mocha/bin/_mocha -- -R spec ./test/*",
     "coveralls": "npm bin /istanbul cover ./node_modules/mocha/bin/_mocha -- -R spec ./test/* && node node_modules/coveralls/bin/coveralls.js < coverage/lcov.info"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/michaeldegroot/socket-anti-spam"
+    "url": "https://github.com/mrwillis/socket-anti-spam"
   },
   "keywords": [
     "socket.io",
@@ -32,11 +32,11 @@
     "coveralls": "^2.11.4",
     "express": "^4.13.3",
     "istanbul": "^0.4.1",
-    "mocha": "^3.0.2",
+    "mocha": "^6.0.2",
     "mocha-lcov-reporter": "^1.2.0",
     "node-static": "^0.7.8",
     "redis": "^2.8.0",
-    "request": "^2.67.0",
+    "request": "^2.88.0",
     "socket.io": "^2.0.1",
     "socket.io-client": "^2.0.1"
   }
