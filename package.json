@@ -1,6 +1,6 @@
 {
   "name": "@betx/socket-anti-spam",
-  "version": "2.1.0",
+  "version": "2.2.0",
   "description": "This module prevents socket.emit spams by clients via ip bans",
   "main": "antispam.js",
   "scripts": {
