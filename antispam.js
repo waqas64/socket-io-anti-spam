@@ -47,7 +47,7 @@ class SocketAntiSpam {
         "Socket-io variable given, binding to onevent's"
       );
       sets.io.on("connection", socket => {
-        const _onevent = socket.onevent;
+        this.nativeSocketOnEvent = socket.onevent;
         socket.onevent = packet => {
           const args = packet.data || [];
           this.addSpam(socket)
@@ -68,12 +68,20 @@ class SocketAntiSpam {
 
     if (this.redis) {
       this.debug("constructor", "Using redis store..");
-      setInterval(() => {
+      this.commitHandler = setInterval(() => {
         this.redisCommit();
       }, 4000);
+      this.readHandler = setInterval(() => {
+        this.redisRead();
+      }, 4000);
     }
-
     this.redisRead();
+  }
+
+  disconnect() {
+    clearInterval(this.commitHandler);
+    clearInterval(this.readHandler);
+    this.options.io.onevent = this.nativeSocketOnEvent;
   }
 
   debug(place, text) {
